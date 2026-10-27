@@ -3,10 +3,10 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 28 October 2026<br>
-> **Current tracked version:** `0.4.2-dev`<br>
-> **Current phase:** Verified financial-correctness and trust remediation<br>
+> **Current tracked version:** `0.4.3-dev`<br>
+> **Current phase:** Future Me outcome-first visual planning experience<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `4f5aa6d` on `main`
+> **Latest implementation milestone:** `4fb9d38` on `main`
 
 ## 1. End goal
 
@@ -302,6 +302,30 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.3-dev` — Future Me outcome canvas
+
+**Date:** 28 October 2026<br>
+**Implementation commit:** `4fb9d38`<br>
+**Git state:** Future Me outcome milestone pushed to `origin/main`
+
+#### Product and visual changes
+
+- Reframed the result around one explicit action: the additional monthly contribution needed for the lower-return scenario.
+- Added a one-click safer-plan preview that updates the plan, headline, metrics, and visual projection together.
+- Replaced the funded ring and decorative bar trajectory with a responsive SVG line chart.
+- Compare the expected path, 2%-lower-return path, and inflation-adjusted target year by year.
+- Added a visual uncertainty band, labelled axes, endpoint markers, and a compact mobile legend without adding a chart dependency.
+- Expanded the result canvas, improved metric hierarchy, and kept the chart in focus across desktop and mobile layouts.
+- Extended deterministic calculations with a conservative year-by-year series and conservative required-monthly amount.
+- Removed the decorative CapitalSense “CS” circle ornament and its unused styles from the homepage.
+
+#### Verification
+
+- All 31 web tests passed across ten files; Future Me's dynamic chart journey passed in a dedicated browser-test run after local worker contention.
+- TypeScript passed, ESLint passed with zero warnings, and the Next.js production build passed for all 12 routes.
+- Visually checked desktop and 390 px mobile layouts with no viewport overflow.
+- Verified that applying the safer plan changes the headline from “Add ₹18,000 / month” to “Keep this rhythm” and changes the SVG projection path.
 
 ### `0.4.2-dev` — Verified audit remediation
 
