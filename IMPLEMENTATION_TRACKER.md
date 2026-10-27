@@ -6,7 +6,7 @@
 > **Current tracked version:** `0.3.0-dev`<br>
 > **Current phase:** Future Me guided decision experience<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Git baseline:** `b8cc842` on `main`
+> **Latest implementation milestone:** `ec171e8` on `main`
 
 ## 1. End goal
 
@@ -220,7 +220,7 @@ Acceptance criteria:
 
 ### `0.3.0` — Future Me MVP
 
-**State:** Implemented and verified on `main`; commit and publication pending<br>
+**State:** Published to `origin/main`<br>
 **Target outcome:** A user can turn a goal into an understandable plan and compare realistic ways to close the gap.
 
 Acceptance criteria:
@@ -306,8 +306,8 @@ Acceptance criteria:
 ### `0.3.0-dev` — Future Me guided decision experience
 
 **Date:** 27 October 2026<br>
-**Implementation commit:** Pending<br>
-**Git state:** Verified locally; publication to `origin/main` pending
+**Implementation commit:** `ec171e8`<br>
+**Git state:** Future Me milestone pushed to `origin/main`
 
 #### Product changes
 
