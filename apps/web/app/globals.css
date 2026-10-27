@@ -7,12 +7,21 @@
 
 /* Paisaan — a digital atelier: classical proportion, contemporary interaction. */
 .site-header{height:78px;border-bottom-color:color-mix(in srgb,var(--line) 78%,transparent);background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(22px) saturate(150%)}
-.brand strong{font-family:Baskerville,"Iowan Old Style",Georgia,serif;font-size:1.35rem;font-weight:600;letter-spacing:-.035em}
-.brand small{font-size:.61rem;letter-spacing:.14em}
-.brand-mark{position:relative;display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid var(--gold);border-radius:50%;background:var(--text);color:var(--bg);box-shadow:inset 0 0 0 3px var(--text),inset 0 0 0 4px color-mix(in srgb,var(--gold) 68%,transparent)}
-.brand-mark:before,.brand-mark:after{content:"";position:absolute;width:5px;height:5px;background:var(--gold);transform:rotate(45deg)}
-.brand-mark:before{top:-3px}.brand-mark:after{bottom:-3px}
-.brand-mark i{display:block;width:auto;height:auto!important;background:transparent!important;font-family:Baskerville,Georgia,serif;font-size:.95rem;font-style:normal}
+.brand{gap:0;isolation:isolate}
+.brand>span.brand-lockup{display:flex;align-items:center;gap:.72rem}
+.brand-symbol{display:block;width:42px;height:42px;filter:drop-shadow(0 8px 13px color-mix(in srgb,#173b75 22%,transparent));transition:transform .55s cubic-bezier(.16,1,.3,1),filter .55s ease}
+.brand-symbol svg{display:block;width:100%;height:100%;overflow:visible}
+.brand-symbol-bg{fill:#173b75}
+.brand-symbol-cut{stroke:#173b75}
+.brand-type{display:grid;align-content:center;line-height:1}
+.brand-type strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:1.32rem;font-weight:820;letter-spacing:-.065em;text-transform:lowercase}
+.brand-type strong span{color:#e57052}
+.brand-type small{margin-top:.32rem;font-size:.55rem;font-weight:720;letter-spacing:.16em;text-transform:uppercase}
+.brand:hover .brand-symbol{transform:rotate(-5deg) translateY(-1px);filter:drop-shadow(0 12px 17px color-mix(in srgb,#173b75 30%,transparent))}
+.brand:hover .brand-symbol circle{transform:translate(1px,-1px)}
+.brand-symbol circle{transform-origin:center;transition:transform .55s cubic-bezier(.16,1,.3,1)}
+:root[data-theme="dark"] .brand-symbol-bg{fill:#234f96}
+:root[data-theme="dark"] .brand-symbol-cut{stroke:#234f96}
 .nav-shell{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(24px) saturate(160%)}
 .primary-nav{height:52px;gap:.15rem}.primary-nav a{font-size:.82rem;transition:color .35s ease,background .35s ease,transform .35s cubic-bezier(.2,.8,.2,1)}
 .primary-nav a:hover{transform:translateY(-1px)}
