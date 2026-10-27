@@ -5,6 +5,12 @@ CapitalSense Decision Studio is a financial decision-support project with two ap
 - A Next.js web app in `apps/web`
 - A Streamlit app launched from `app.py`
 
+## Product direction and implementation history
+
+The living source of truth for the product vision, user outcomes, feature consolidation, roadmap, release criteria, and version-by-version code history is the [Paisaan Implementation Tracker](./IMPLEMENTATION_TRACKER.md).
+
+Update the tracker with every product increment so implementation decisions and completed work remain visible across devices, contributors, and future Codex tasks.
+
 ## Local setup
 
 ### Next.js app

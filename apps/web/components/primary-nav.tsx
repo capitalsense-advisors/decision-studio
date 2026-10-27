@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const items = [
-  ["/", "Overview"],
-  ["/tools", "Decision tools"],
-  ["/portfolio", "Holdings"],
-  ["/risk", "Portfolio risk"],
-  ["/mutual-funds", "Mutual funds"],
-  ["/guide", "Guide"],
+  ["/", "Home"],
+  ["/tools", "Future Me"],
+  ["/portfolio", "Money Mirror"],
+  ["/mutual-funds", "Fund Match"],
+  ["/risk", "Deep Dive"],
+  ["/guide", "How we math"],
 ] as const;
 
 export function PrimaryNav() {
