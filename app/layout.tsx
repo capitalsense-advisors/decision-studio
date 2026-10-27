@@ -7,8 +7,8 @@ import { ThemeControl } from "@/components/theme-control";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Decision Studio", template: "%s | Decision Studio" },
-  description: "Private, deterministic financial decision tools by CapitalSense.",
+  title: { default: "Paisaan by CapitalSense", template: "%s | Paisaan" },
+  description: "Clear, beautifully designed financial decisions for the life you are building.",
 };
 
 export const viewport: Viewport = {
@@ -23,12 +23,12 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <a className="skip-link" href="#main-content">Skip to content</a>
     <div className="app-shell">
       <header className="site-header">
-        <Link href="/" className="brand" aria-label="Decision Studio overview"><span className="brand-mark"><i /><i /><i /></span><span><strong>Decision<span>Studio</span></strong><small>by CapitalSense</small></span></Link>
-        <p className="product-label"><i /> Deterministic planning tools</p>
+        <Link href="/" className="brand" aria-label="Paisaan home"><span className="brand-mark" aria-hidden="true"><i>P</i></span><span><strong>Paisaan</strong><small>by CapitalSense</small></span></Link>
+        <p className="product-label"><i /> Private by design</p>
       </header>
       <div className="nav-shell"><PrimaryNav /></div>
       <main id="main-content">{children}</main>
-      <footer><span>Educational decision support only. Verify prices, taxes and suitability independently.</span><ThemeControl /></footer>
+      <footer><span><b>Paisaan</b> helps you think clearly. It does not execute trades or replace professional advice.</span><ThemeControl /></footer>
     </div>
   </body></html>;
 }
