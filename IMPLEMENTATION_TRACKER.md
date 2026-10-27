@@ -6,7 +6,7 @@
 > **Current tracked version:** `0.4.0-dev`<br>
 > **Current phase:** Money Mirror guided data and concentration experience<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `ec171e8` on `main`
+> **Latest implementation milestone:** `d76c2de` on `main`
 
 ## 1. End goal
 
@@ -236,7 +236,7 @@ Acceptance criteria:
 
 ### `0.4.0` — Money Mirror MVP
 
-**State:** Core data and concentration journey implemented; advanced risk integration remains<br>
+**State:** Core data and concentration journey published; advanced risk integration remains<br>
 **Target outcome:** A user can understand the most important risk or imbalance in their portfolio.
 
 Acceptance criteria:
@@ -306,8 +306,8 @@ Acceptance criteria:
 ### `0.4.0-dev` — Money Mirror guided portfolio workflow
 
 **Date:** 27 October 2026<br>
-**Implementation commit:** Pending<br>
-**Git state:** Verified locally; publication to `origin/main` pending
+**Implementation commit:** `d76c2de`<br>
+**Git state:** Money Mirror core milestone ready for publication to `origin/main`
 
 #### Product changes
 
