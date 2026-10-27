@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { futurePlan } from "@/lib/calculations";
+import { equalWeightReturns, futurePlan, portfolioRisk } from "@/lib/calculations";
 
 const base = {
   targetToday: 120_000,
@@ -44,5 +44,23 @@ describe("futurePlan", () => {
 
     expect(result.conservativeCorpus).toBeLessThan(result.projectedCorpus);
     expect(result.totalContributed).toBe(1_800_000);
+  });
+});
+
+describe("portfolio risk inputs", () => {
+  it("builds an equal-weight return series instead of averaging raw prices", () => {
+    const returns = equalWeightReturns({
+      EXPENSIVE: [{ date: "2026-01-01", value: 5_000 }, { date: "2026-01-02", value: 5_000 }],
+      CHEAP: [{ date: "2026-01-01", value: 100 }, { date: "2026-01-02", value: 110 }],
+    });
+
+    expect(returns).toHaveLength(1);
+    expect(returns[0]).toBeCloseTo(0.05, 12);
+  });
+
+  it("annualises the realised compounded path rather than the arithmetic mean", () => {
+    const result = portfolioRisk([0.1, -0.1], 0.95, 1);
+
+    expect(result?.annualReturn).toBeCloseTo(Math.pow(0.99, 126) - 1, 10);
   });
 });

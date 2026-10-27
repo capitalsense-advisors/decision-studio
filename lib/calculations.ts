@@ -209,7 +209,8 @@ export function portfolioRisk(returns: number[], confidence = 0.95, horizon = 1)
   const parametricVar = -(mean * horizon + z * sigma * Math.sqrt(horizon));
   let growth = 1; let peak = 1; let maxDrawdown = 0;
   for (const value of clean) { growth *= 1 + value; peak = Math.max(peak, growth); maxDrawdown = Math.min(maxDrawdown, growth / peak - 1); }
-  return { observations: clean.length, annualReturn: Math.pow(1 + mean, 252) - 1, annualVolatility: sigma * Math.sqrt(252), historicalVar, historicalCvar, parametricVar, maxDrawdown };
+  const annualReturn = growth > 0 ? Math.pow(growth, 252 / clean.length) - 1 : -1;
+  return { observations: clean.length, annualReturn, annualVolatility: sigma * Math.sqrt(252), historicalVar, historicalCvar, parametricVar, maxDrawdown };
 }
 
 export function monteCarloVar(returns: number[], confidence = 0.95, horizon = 1, simulations = 10000) {
@@ -226,6 +227,22 @@ export function monteCarloVar(returns: number[], confidence = 0.95, horizon = 1,
 
 export function returnsFromPrices(prices: number[]) {
   return prices.slice(1).map((value, index) => value / prices[index] - 1).filter(Number.isFinite);
+}
+
+export function equalWeightReturns(series: Record<string, Array<{ date: string; value: number }>>) {
+  const returnMaps = Object.values(series).map((points) => {
+    const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+    return new Map(sorted.slice(1).flatMap((point, index) => {
+      const previous = sorted[index].value;
+      const dailyReturn = point.value / previous - 1;
+      return Number.isFinite(dailyReturn) ? [[point.date, dailyReturn] as const] : [];
+    }));
+  });
+  if (!returnMaps.length) return [];
+  const commonDates = [...returnMaps[0].keys()]
+    .filter((date) => returnMaps.every((map) => map.has(date)))
+    .sort();
+  return commonDates.map((date) => returnMaps.reduce((sum, map) => sum + (map.get(date) ?? 0), 0) / returnMaps.length);
 }
 
 export function trailingReturns(points: Array<{ date: string; value: number }>) {

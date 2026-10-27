@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export function PageHeading({ kicker, title, copy }: { kicker: string; title: ReactNode; copy: string }) {
-  return <section className="page-heading"><div><span className="eyebrow">{kicker}</span><h1>{title}</h1><p className="lede">{copy}</p></div><div className="privacy-mark"><i /> Session private</div></section>;
+  return <section className="page-heading"><div><span className="eyebrow">{kicker}</span><h1>{title}</h1><p className="lede">{copy}</p></div><div className="privacy-mark"><i /> No account · session only</div></section>;
 }
 
 export function Metric({ label, value, note }: { label: string; value: ReactNode; note?: string }) {
