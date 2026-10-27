@@ -3,8 +3,8 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 27 October 2026<br>
-> **Current tracked version:** `0.3.0-dev`<br>
-> **Current phase:** Future Me guided decision experience<br>
+> **Current tracked version:** `0.4.0-dev`<br>
+> **Current phase:** Money Mirror guided data and concentration experience<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
 > **Latest implementation milestone:** `ec171e8` on `main`
 
@@ -91,7 +91,7 @@ Paisaan is educational decision support. It does **not**:
 |---|---|---|---|---|
 | Home | `/` | Orient the user around three decisions | Brand story, product paths, trust framing | New design implemented in `0.2.0-dev` |
 | Future Me | `/tools` | Turn a goal into a feasible plan | Goal templates, live sliders, scenario testing, Reality Check, and Your Move | MVP implemented in `0.3.0-dev` |
-| Money Mirror | `/portfolio` | Explain portfolio health | Manual holdings, CSV import, allocation, concentration | Basic MVP exists |
+| Money Mirror | `/portfolio` | Explain portfolio health | Guided import, validated holdings, Yahoo/manual pricing, asset and position concentration, Mirror Guide | Core journey implemented; downside and sector layers remain |
 | Fund Match | `/mutual-funds` | Evaluate suitability and compare funds | Fund search, NAV history, returns, volatility, drawdown | Single-fund analysis exists; fit and comparison not built |
 | Deep Dive | `/risk` | Reveal advanced portfolio risk when requested | Parametric, historical and Monte Carlo VaR | Engine and interface exist; not integrated into Money Mirror |
 | How we math | `/guide` | Explain methods, data, assumptions, privacy, and limitations | Existing workflow guide | Exists; needs Paisaan rewrite |
@@ -168,7 +168,7 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Persistence | Browser session only | Account-optional saved decisions | Not started |
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
-| Automated tests | 29 Python tests plus 21 web calculation, journey, API, and adapter tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
+| Automated tests | 29-test legacy baseline plus 26 current web calculation, journey, API, adapter, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
 | Deployment | Local application | GitHub-backed hosted environments | Not configured |
 
 ## 8. Delivery roadmap
@@ -236,19 +236,19 @@ Acceptance criteria:
 
 ### `0.4.0` — Money Mirror MVP
 
-**State:** Planned<br>
+**State:** Core data and concentration journey implemented; advanced risk integration remains<br>
 **Target outcome:** A user can understand the most important risk or imbalance in their portfolio.
 
 Acceptance criteria:
 
-- [ ] Replace the editable table as the first impression with a guided import flow.
-- [ ] Preserve manual entry and CSV review before analysis.
-- [ ] Add asset, sector, and position concentration.
-- [ ] Explain the single most important portfolio issue first.
+- [x] Replace the editable table as the first impression with a guided import flow.
+- [x] Preserve manual entry and CSV review before analysis.
+- [ ] Add asset, sector, and position concentration. Asset and position complete; sector remains.
+- [x] Explain the single most important portfolio issue first.
 - [ ] Integrate understandable downside-risk summaries.
 - [ ] Move VaR detail behind Show Me the Math.
-- [ ] Add data freshness and incomplete-data states.
-- [ ] Add privacy, accessibility, and calculation tests.
+- [x] Add data freshness and incomplete-data states.
+- [x] Add privacy, accessibility, and calculation tests.
 
 ### `0.5.0` — Fund Match MVP
 
@@ -302,6 +302,50 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.0-dev` — Money Mirror guided portfolio workflow
+
+**Date:** 27 October 2026<br>
+**Implementation commit:** Pending<br>
+**Git state:** Verified locally; publication to `origin/main` pending
+
+#### Product changes
+
+- Replaced the editable data table as the first impression with CSV, gentle manual-entry, and sample paths.
+- Added compact holding cards for review instead of a wide spreadsheet wall.
+- Added India/NSE and US market selection with explicit invalidation when the exchange changes.
+- Added Yahoo closing-price refresh with visible source dates and manual-price fallback.
+- Added one plain-language Read, position weights, effective holdings, asset mix, Reality Check, and three Your Move options.
+- Added the contextual **Mirror Guide** for CSV structure, ticker symbols, price failures, and result interpretation.
+
+#### Data-safety changes
+
+- Parse CSV files in the browser; only ticker symbols are sent to the server price endpoint.
+- Enforce a 250 KB file limit and a 10-holding analysis limit.
+- Support quoted CSV values, BOMs, header aliases, duplicate detection, and numeric validation.
+- Preserve valid Yahoo results during partial failures and never overwrite the draft with missing values.
+- Exclude unpriced holdings from analysis and disclose every omission.
+- Keep assistant guidance rule-based and separate from deterministic calculations.
+
+#### Code changed
+
+- `apps/web/app/portfolio/page.tsx` — guided import, review, Yahoo refresh, analysis, and Mirror Guide.
+- `apps/web/app/portfolio/layout.tsx` — route-specific metadata.
+- `apps/web/lib/portfolio.ts` — CSV parsing, validation, latest-price extraction, and portfolio concentration analysis.
+- `apps/web/lib/portfolio.test.ts` — parsing, validation, concentration, and price-date tests.
+- `apps/web/app/portfolio/page.test.tsx` — complete sample-to-Yahoo-to-Read journey test.
+- `apps/web/app/globals.css` — responsive cards, progress, analysis, assistant, and interaction styling.
+
+#### Verification
+
+- TypeScript: passed.
+- ESLint: passed with zero warnings.
+- Vitest: 26 tests passed across eight files.
+- Next.js production build: passed; eleven routes generated.
+- Dependency audit: zero known vulnerabilities.
+- Production-mode route check: `/portfolio` returned HTTP 200 and correct metadata.
+- Live Yahoo check: RELIANCE, HDFCBANK, INFY, and TCS returned 495 points each with no failures; latest RELIANCE date was 27 October 2026.
+- Legacy Python regression rerun: blocked by the machine's removed Python 3.11 interpreter; the failure occurred before test collection and is unrelated to changed web files.
 
 ### `0.3.0-dev` — Future Me guided decision experience
 
@@ -492,22 +536,23 @@ The imported repository indicates that the project began as a Streamlit decision
 | 27 Oct 2026 | Keep deterministic calculation separate from optional AI explanation | Financial outputs must remain reproducible and auditable | AI may explain a result but cannot silently produce the underlying answer |
 | 27 Oct 2026 | Normalize and validate all third-party data at the server boundary | External schemas and outages must not leak unpredictable behavior into financial journeys | UI consumers receive stable shapes, bounded failures, request IDs, and explicit caching |
 | 27 Oct 2026 | Make Future Me one planning journey instead of a tool catalogue | Young users need a clear decision path, not a choice between finance calculators | Non-core valuation, tax, trade, multiplier, and allocation tools are removed from the primary route |
+| 27 Oct 2026 | Keep the Money Mirror assistant deterministic and contextual | An assistant should reduce data-entry confusion without becoming an unaudited financial engine | Guidance can explain CSVs, symbols, failures, and results but cannot alter calculations or invent prices |
 
 ## 11. Known gaps and risks
 
 ### Product gaps
 
-- Money Mirror, Fund Match, Deep Dive, and How we math still look and behave like utilities rather than guided decisions.
-- Money Mirror does not yet analyse sectors, asset classes, or cross-fund overlap.
+- Fund Match, Deep Dive, and How we math still look and behave like utilities rather than guided decisions.
+- Money Mirror does not yet analyse sectors, cross-fund overlap, portfolio return series, or understandable downside risk.
 - Fund Match analyses one scheme at a time and does not yet measure personal fit.
-- Your Move has not been implemented in any working result flow.
+- Your Move is implemented in Future Me and Money Mirror, but not yet in Fund Match.
 - There is no saved decision history or cross-device continuity.
 
 ### Engineering gaps
 
 - Financial logic exists in both Python and TypeScript, creating parity risk.
-- Browser and end-to-end testing are not established; current web coverage focuses on server adapters and API contracts.
-- Web calculation utilities need dedicated unit tests.
+- Browser end-to-end automation is not established; current web coverage includes component journeys, calculations, adapters, and API contracts.
+- The legacy Python virtual environment points to a removed Python 3.11 installation and must be recreated before its 29-test baseline can be rerun locally.
 - External data adapters still need source-health monitoring, rate limiting, and provider fallback.
 - Some imported source strings display encoding artefacts and need cleanup.
 - Authentication, persistence, telemetry, monitoring, and deployment are not configured.
