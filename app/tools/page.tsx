@@ -62,9 +62,9 @@ export default function FutureMePage() {
   const percentReady = Math.floor(Math.min(1, result.fundingRatio) * 100);
   const baseOnTrack = result.shortfall === 0;
   const conservativeOnTrack = result.conservativeCorpus >= result.futureTarget;
-  const recommendedMonthly = Math.ceil(result.requiredMonthly / 1000) * 1000;
-  const monthlyDelta = Math.max(0, recommendedMonthly - monthly);
-  const recommendedWithinRange = recommendedMonthly <= 250_000;
+  const saferMonthly = Math.ceil(result.conservativeRequiredMonthly / 1000) * 1000;
+  const saferDelta = Math.max(0, saferMonthly - monthly);
+  const saferWithinRange = saferMonthly <= 250_000;
   const extensionWithinRange = Boolean(result.extensionYears && years + result.extensionYears <= 35);
   const status = conservativeOnTrack ? "On track" : baseOnTrack ? "Close · fragile" : "A gap to close";
   const read = conservativeOnTrack
@@ -81,7 +81,7 @@ export default function FutureMePage() {
           <h1>Make tomorrow feel <em>touchable.</em></h1>
           <p>Choose the life moment. Move what feels possible. Paisaan does the maths quietly and gives you a decision—not another form to complete.</p>
         </div>
-        <div className="future-seal" aria-hidden="true"><span>FM</span><small>Est. today</small></div>
+        <div className="future-hero-proof" aria-hidden="true"><span>One plan</span><strong>3 paths</strong><small>Expected · safer · more time</small></div>
       </header>
 
       <section className="goal-picker" aria-labelledby="goal-heading">
@@ -130,20 +130,24 @@ export default function FutureMePage() {
 
         <aside className="future-result">
           <header><span>The Read</span><i className={conservativeOnTrack ? "on-track" : "needs-work"}>{status}</i></header>
-          <div className="read-ring" style={{ "--progress": `${percentReady * 3.6}deg` } as React.CSSProperties}>
-            <div><strong>{percentReady}<small>%</small></strong><span>funded</span></div>
+          <div className="future-outcome">
+            <span>Your clearest move</span>
+            <strong>{conservativeOnTrack ? "Keep this rhythm" : saferWithinRange ? `Add ${money(saferDelta, true)} / month` : "Give the goal more time"}</strong>
+            <p>{conservativeOnTrack
+              ? `${money(monthly, true)} monthly already reaches the goal in the lower-return check.`
+              : saferWithinRange
+                ? `Move from ${money(monthly, true)} to ${money(saferMonthly, true)} monthly to target the goal even at a 2% lower return.`
+                : `The safer monthly requirement is about ${money(saferMonthly, true)}, outside this planner's range. Adjust the date or target instead.`}</p>
+            {!conservativeOnTrack && saferWithinRange && <button type="button" onClick={() => setMonthly(saferMonthly)} disabled={emergencyReady === false}>{emergencyReady === false ? "Build your cushion first" : "Preview the safer plan"}<span>→</span></button>}
           </div>
-          <h2>{read}</h2>
-          <p>Projected <b>{money(result.projectedCorpus, true)}</b> against a future target of <b>{money(result.futureTarget, true)}</b>.</p>
+          <div className="future-summary"><h2>{read}</h2><strong>{percentReady}% <small>base case funded</small></strong></div>
           <div className="result-split">
-            <div><span>Your money</span><strong>{money(result.totalContributed, true)}</strong></div>
-            <div><span>Growth doing the work</span><strong>{money(result.growthEarned, true)}</strong></div>
-            <div><span>At 2% lower return</span><strong>{money(result.conservativeCorpus, true)}</strong></div>
+            <div><span>Future target</span><strong>{money(result.futureTarget, true)}</strong></div>
+            <div><span>Expected path</span><strong>{money(result.projectedCorpus, true)}</strong></div>
+            <div><span>Lower-return path</span><strong>{money(result.conservativeCorpus, true)}</strong></div>
           </div>
-          <div className="trajectory" role="img" aria-label={`Projected corpus grows to ${money(result.projectedCorpus, true)} over ${years} years`}>
-            {result.series.map((point) => <i key={point.year} style={{ height: `${Math.max(6, point.corpus / Math.max(result.futureTarget, result.projectedCorpus) * 100)}%` }} />)}
-          </div>
-          <small className="result-caption">Goal entered in today&apos;s rupees · future target includes inflation · updates as you move a control</small>
+          <FutureChart baseline={result.series} conservative={result.conservativeSeries} initialCorpus={savings} initialTarget={target} years={years} />
+          <small className="result-caption">Live projection · goal entered in today&apos;s rupees · target rises with inflation</small>
         </aside>
       </section>
 
@@ -156,8 +160,8 @@ export default function FutureMePage() {
         <article className="moves-card">
           <span>Your Move</span><h2>Three honest ways forward.</h2>
           <div className="move-options">
-            <button type="button" onClick={() => setMonthly(recommendedMonthly)} disabled={conservativeOnTrack || !recommendedWithinRange || emergencyReady === false}>
-              <i>01</i><span><b>{conservativeOnTrack ? "Keep this rhythm" : !recommendedWithinRange ? "Monthly fix is outside this planner" : emergencyReady === false ? "Build the cushion first" : `Add ${money(monthlyDelta, true)} monthly`}</b><small>{conservativeOnTrack ? "Review once a year" : !recommendedWithinRange ? `Required contribution is about ${money(recommendedMonthly, true)}` : emergencyReady === false ? "Do not stretch the contribution yet" : `Round contribution to ${money(recommendedMonthly, true)}`}</small></span>
+            <button type="button" onClick={() => setMonthly(saferMonthly)} disabled={conservativeOnTrack || !saferWithinRange || emergencyReady === false}>
+              <i>01</i><span><b>{conservativeOnTrack ? "Keep this rhythm" : !saferWithinRange ? "Monthly fix is outside this planner" : emergencyReady === false ? "Build the cushion first" : `Use the safer ${money(saferMonthly, true)} monthly`}</b><small>{conservativeOnTrack ? "Review once a year" : !saferWithinRange ? `Required contribution is about ${money(saferMonthly, true)}` : emergencyReady === false ? "Do not stretch the contribution yet" : `${money(saferDelta, true)} more than today; lower-return tested`}</small></span>
             </button>
             <button type="button" onClick={() => result.extensionYears && extensionWithinRange && setYears(years + result.extensionYears)} disabled={!extensionWithinRange || conservativeOnTrack}>
               <i>02</i><span><b>{result.extensionYears && extensionWithinRange && !conservativeOnTrack ? `Give it ${result.extensionYears} more ${result.extensionYears === 1 ? "year" : "years"}` : result.extensionYears && !extensionWithinRange ? "More time exceeds this planner" : "Time is already working"}</b><small>{result.extensionYears && !extensionWithinRange ? "The planner supports up to 35 years" : "Trade speed for a gentler monthly ask"}</small></span>
@@ -179,6 +183,44 @@ export default function FutureMePage() {
       />
     </div>
   );
+}
+
+function FutureChart({ baseline, conservative, initialCorpus, initialTarget, years }: {
+  baseline: Array<{ year: number; corpus: number; target: number }>;
+  conservative: Array<{ year: number; corpus: number; target: number }>;
+  initialCorpus: number;
+  initialTarget: number;
+  years: number;
+}) {
+  const gradientId = useId().replace(/:/g, "");
+  const width = 720;
+  const height = 300;
+  const plot = { left: 54, right: 18, top: 22, bottom: 40 };
+  const basePoints = [{ year: 0, corpus: initialCorpus, target: initialTarget }, ...baseline];
+  const safePoints = [{ year: 0, corpus: initialCorpus, target: initialTarget }, ...conservative];
+  const maximum = Math.max(1, ...basePoints.flatMap((point) => [point.corpus, point.target]), ...safePoints.map((point) => point.corpus)) * 1.08;
+  const x = (year: number) => plot.left + (year / Math.max(1, years)) * (width - plot.left - plot.right);
+  const y = (value: number) => plot.top + (1 - value / maximum) * (height - plot.top - plot.bottom);
+  const line = (points: typeof basePoints, key: "corpus" | "target") => points.map((point, index) => `${index ? "L" : "M"}${x(point.year).toFixed(1)},${y(point[key]).toFixed(1)}`).join(" ");
+  const band = `${line(basePoints, "corpus")} ${[...safePoints].reverse().map((point) => `L${x(point.year).toFixed(1)},${y(point.corpus).toFixed(1)}`).join(" ")} Z`;
+  const endBase = basePoints[basePoints.length - 1];
+  const endSafe = safePoints[safePoints.length - 1];
+
+  return <figure className="future-chart">
+    <figcaption><span>Your path, year by year</span><div><i className="expected"/>Expected <i className="safer"/>Lower return <i className="target"/>Target</div></figcaption>
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Line chart comparing the expected projection, lower-return projection, and inflation-adjusted target over ${years} years`} preserveAspectRatio="xMidYMid meet">
+      <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9cb0ff" stopOpacity=".22"/><stop offset="1" stopColor="#9cb0ff" stopOpacity=".02"/></linearGradient></defs>
+      {[0, .25, .5, .75, 1].map((tick) => <g key={tick}><line className="chart-grid" x1={plot.left} x2={width - plot.right} y1={y(maximum * tick)} y2={y(maximum * tick)}/>{tick > 0 && <text className="chart-y-label" x={plot.left - 8} y={y(maximum * tick) + 4}>{money(maximum * tick, true)}</text>}</g>)}
+      <path className="chart-band" d={band} fill={`url(#${gradientId})`}/>
+      <path className="chart-line target" d={line(basePoints, "target")}/>
+      <path className="chart-line safer" d={line(safePoints, "corpus")}/>
+      <path className="chart-line expected" d={line(basePoints, "corpus")}/>
+      <circle className="chart-dot expected" cx={x(endBase.year)} cy={y(endBase.corpus)} r="5"/>
+      <circle className="chart-dot safer" cx={x(endSafe.year)} cy={y(endSafe.corpus)} r="4"/>
+      <text className="chart-x-label" x={plot.left} y={height - 12}>Today</text>
+      <text className="chart-x-label end" x={width - plot.right} y={height - 12}>Year {years}</text>
+    </svg>
+  </figure>;
 }
 
 function RangeControl({ label, value, min, max, step, display, onChange }: { label: string; value: number; min: number; max: number; step: number; display: string; onChange: (value: number) => void }) {
