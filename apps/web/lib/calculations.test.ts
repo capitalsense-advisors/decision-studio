@@ -43,6 +43,8 @@ describe("futurePlan", () => {
     const result = futurePlan({ ...base, annualReturn: 0.1, monthlyContribution: 15_000 });
 
     expect(result.conservativeCorpus).toBeLessThan(result.projectedCorpus);
+    expect(result.conservativeRequiredMonthly).toBeGreaterThan(result.requiredMonthly);
+    expect(result.conservativeSeries).toHaveLength(10);
     expect(result.totalContributed).toBe(1_800_000);
   });
 });

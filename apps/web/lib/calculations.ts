@@ -21,12 +21,14 @@ export type FuturePlanResult = {
   projectedCorpus: number;
   conservativeCorpus: number;
   requiredMonthly: number;
+  conservativeRequiredMonthly: number;
   shortfall: number;
   fundingRatio: number;
   totalContributed: number;
   growthEarned: number;
   extensionYears: number | null;
   series: Array<{ year: number; corpus: number; target: number }>;
+  conservativeSeries: Array<{ year: number; corpus: number; target: number }>;
 };
 
 function projectCorpus(input: FuturePlanInput, overrideYears = input.years, returnAdjustment = 0) {
@@ -64,7 +66,12 @@ export function futurePlan(rawInput: FuturePlanInput): FuturePlanResult {
   const requiredMonthly = contributionFactor > 0
     ? Math.max(0, (baseline.futureTarget - withoutNewContributions) / contributionFactor)
     : 0;
-  const conservativeCorpus = projectCorpus(input, input.years, -0.02).corpus;
+  const conservative = projectCorpus(input, input.years, -0.02);
+  const conservativeWithoutNewContributions = projectCorpus({ ...input, monthlyContribution: 0 }, input.years, -0.02).corpus;
+  const conservativeContributionFactor = projectCorpus({ ...input, currentSavings: 0, monthlyContribution: 1 }, input.years, -0.02).corpus;
+  const conservativeRequiredMonthly = conservativeContributionFactor > 0
+    ? Math.max(0, (conservative.futureTarget - conservativeWithoutNewContributions) / conservativeContributionFactor)
+    : 0;
   const shortfall = Math.max(0, baseline.futureTarget - baseline.corpus);
   const fundingRatio = Math.min(2, baseline.corpus / baseline.futureTarget);
 
@@ -81,14 +88,16 @@ export function futurePlan(rawInput: FuturePlanInput): FuturePlanResult {
   return {
     futureTarget: baseline.futureTarget,
     projectedCorpus: baseline.corpus,
-    conservativeCorpus,
+    conservativeCorpus: conservative.corpus,
     requiredMonthly,
+    conservativeRequiredMonthly,
     shortfall,
     fundingRatio,
     totalContributed: baseline.contributed,
     growthEarned: Math.max(0, baseline.corpus - baseline.contributed),
     extensionYears,
     series: baseline.series,
+    conservativeSeries: conservative.series,
   };
 }
 

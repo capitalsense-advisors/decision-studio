@@ -45,7 +45,6 @@ export default function HomePage() {
       <section className="atelier-hero" aria-labelledby="hero-title">
         <div className="hero-halo halo-one" aria-hidden="true" />
         <div className="hero-halo halo-two" aria-hidden="true" />
-        <div className="atelier-ornament" aria-hidden="true"><span>CS</span></div>
         <div className="atelier-copy">
           <span className="eyebrow">A new language for your money</span>
           <h1 id="hero-title">Know your money.<br /><em>Make your move.</em></h1>
