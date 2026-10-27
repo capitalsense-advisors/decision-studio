@@ -5,6 +5,93 @@ export type Result = {
   warnings: string[];
 };
 
+export type FuturePlanInput = {
+  targetToday: number;
+  currentSavings: number;
+  monthlyContribution: number;
+  years: number;
+  annualReturn: number;
+  inflation: number;
+  annualStepUp: number;
+  inflationAdjusted: boolean;
+};
+
+export type FuturePlanResult = {
+  futureTarget: number;
+  projectedCorpus: number;
+  conservativeCorpus: number;
+  requiredMonthly: number;
+  shortfall: number;
+  fundingRatio: number;
+  totalContributed: number;
+  growthEarned: number;
+  extensionYears: number | null;
+  series: Array<{ year: number; corpus: number; target: number }>;
+};
+
+function projectCorpus(input: FuturePlanInput, overrideYears = input.years, returnAdjustment = 0) {
+  const years = Math.max(1, Math.round(overrideYears));
+  const annualReturn = Math.max(-0.5, input.annualReturn + returnAdjustment);
+  const monthlyRate = Math.pow(1 + annualReturn, 1 / 12) - 1;
+  let corpus = Math.max(0, input.currentSavings);
+  let contributed = corpus;
+  const series: Array<{ year: number; corpus: number; target: number }> = [];
+  const futureTarget = Math.max(0, input.targetToday) * (input.inflationAdjusted ? Math.pow(1 + Math.max(0, input.inflation), years) : 1);
+
+  for (let year = 1; year <= years; year += 1) {
+    const monthly = Math.max(0, input.monthlyContribution) * Math.pow(1 + Math.max(0, input.annualStepUp), year - 1);
+    for (let month = 0; month < 12; month += 1) corpus = corpus * (1 + monthlyRate) + monthly;
+    contributed += monthly * 12;
+    const targetAtYear = Math.max(0, input.targetToday) * (input.inflationAdjusted ? Math.pow(1 + Math.max(0, input.inflation), year) : 1);
+    series.push({ year, corpus, target: targetAtYear });
+  }
+
+  return { corpus, contributed, futureTarget, series };
+}
+
+export function futurePlan(rawInput: FuturePlanInput): FuturePlanResult {
+  const input = {
+    ...rawInput,
+    targetToday: Math.max(1, rawInput.targetToday),
+    years: Math.min(50, Math.max(1, Math.round(rawInput.years))),
+    annualReturn: Math.min(0.3, Math.max(-0.5, rawInput.annualReturn)),
+    inflation: Math.min(0.2, Math.max(0, rawInput.inflation)),
+    annualStepUp: Math.min(0.5, Math.max(0, rawInput.annualStepUp)),
+  };
+  const baseline = projectCorpus(input);
+  const withoutNewContributions = projectCorpus({ ...input, monthlyContribution: 0 }).corpus;
+  const contributionFactor = projectCorpus({ ...input, currentSavings: 0, monthlyContribution: 1 }).corpus;
+  const requiredMonthly = contributionFactor > 0
+    ? Math.max(0, (baseline.futureTarget - withoutNewContributions) / contributionFactor)
+    : 0;
+  const conservativeCorpus = projectCorpus(input, input.years, -0.02).corpus;
+  const shortfall = Math.max(0, baseline.futureTarget - baseline.corpus);
+  const fundingRatio = Math.min(2, baseline.corpus / baseline.futureTarget);
+
+  let extensionYears: number | null = null;
+  if (shortfall > 0) {
+    for (let extra = 1; extra <= 10; extra += 1) {
+      if (projectCorpus(input, input.years + extra).corpus >= projectCorpus(input, input.years + extra).futureTarget) {
+        extensionYears = extra;
+        break;
+      }
+    }
+  }
+
+  return {
+    futureTarget: baseline.futureTarget,
+    projectedCorpus: baseline.corpus,
+    conservativeCorpus,
+    requiredMonthly,
+    shortfall,
+    fundingRatio,
+    totalContributed: baseline.contributed,
+    growthEarned: Math.max(0, baseline.corpus - baseline.contributed),
+    extensionYears,
+    series: baseline.series,
+  };
+}
+
 export function goalPlan(input: { monthlySip: number; stepUp: number; years: number; annualReturn: number; inflation: number; monthlyExpenses: number }): Result {
   const monthlyRate = Math.pow(1 + input.annualReturn, 1 / 12) - 1;
   let corpus = 0;

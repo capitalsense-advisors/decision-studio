@@ -3,8 +3,8 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 27 October 2026<br>
-> **Current tracked version:** `0.2.1-dev`<br>
-> **Current phase:** Backend reliability foundation<br>
+> **Current tracked version:** `0.3.0-dev`<br>
+> **Current phase:** Future Me guided decision experience<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
 > **Git baseline:** `b8cc842` on `main`
 
@@ -50,10 +50,10 @@ Every shipped feature must improve at least one of these outcomes. A feature tha
 | Outcome | User should be able to… | Product evidence | Status |
 |---|---|---|---|
 | Understand | Explain the result in ordinary language | Plain-language result and assumptions | Partial |
-| Decide | Compare no more than 2–3 meaningful choices | “Your Move” action card | Not started |
-| Test | Change a key assumption and see the consequence | “What If?” interaction | Partial |
-| Avoid mistakes | Notice concentration, unrealistic assumptions, costs, and risk | “Reality Check” warnings | Partial |
-| Act confidently | Know what to do next without receiving an execution prompt | Clear next step and review date | Not started |
+| Decide | Compare no more than 2–3 meaningful choices | “Your Move” action card | Implemented in Future Me |
+| Test | Change a key assumption and see the consequence | “What If?” interaction | Implemented in Future Me |
+| Avoid mistakes | Notice concentration, unrealistic assumptions, costs, and risk | “Reality Check” warnings | Implemented in Future Me; partial elsewhere |
+| Act confidently | Know what to do next without receiving an execution prompt | Clear next step and review date | Implemented in Future Me |
 | Trust the result | See source, data date, method, limitations, and privacy state | “Show me the math” detail | Partial |
 | Return | Save or revisit a decision as circumstances change | Decision history and review reminders | Not started |
 
@@ -90,7 +90,7 @@ Paisaan is educational decision support. It does **not**:
 | Experience | Current route | Purpose | Included capabilities | Delivery status |
 |---|---|---|---|---|
 | Home | `/` | Orient the user around three decisions | Brand story, product paths, trust framing | New design implemented in `0.2.0-dev` |
-| Future Me | `/tools` | Turn a goal into a feasible plan | Goal, SIP, retirement, FIRE, home affordability, scenario testing | Existing calculators; consolidation not started |
+| Future Me | `/tools` | Turn a goal into a feasible plan | Goal templates, live sliders, scenario testing, Reality Check, and Your Move | MVP implemented in `0.3.0-dev` |
 | Money Mirror | `/portfolio` | Explain portfolio health | Manual holdings, CSV import, allocation, concentration | Basic MVP exists |
 | Fund Match | `/mutual-funds` | Evaluate suitability and compare funds | Fund search, NAV history, returns, volatility, drawdown | Single-fund analysis exists; fit and comparison not built |
 | Deep Dive | `/risk` | Reveal advanced portfolio risk when requested | Parametric, historical and Monte Carlo VaR | Engine and interface exist; not integrated into Money Mirror |
@@ -100,10 +100,10 @@ Paisaan is educational decision support. It does **not**:
 
 | Name | Purpose | Status |
 |---|---|---|
-| **The Read** | One plain-language conclusion | Demonstrated on home only |
-| **What If?** | Interactive scenario comparison | Calculators exist; unified interaction not built |
-| **Reality Check** | Risks, weak assumptions, and missing information | Warnings exist; presentation not unified |
-| **Your Move** | Two or three realistic next actions | Not built |
+| **The Read** | One plain-language conclusion | Implemented in Future Me |
+| **What If?** | Interactive scenario comparison | Implemented through live planning sliders in Future Me |
+| **Reality Check** | Risks, weak assumptions, and missing information | Implemented in Future Me; not yet unified elsewhere |
+| **Your Move** | Two or three realistic next actions | Implemented in Future Me |
 | **Switch Check** | Tax, exit load, and break-even before changing funds | Tax engine exists; fund workflow not built |
 | **Break It Down** | Optional plain-language explanation | AI service exists in legacy app only |
 | **Show Me the Math** | Methodology, assumptions, and detailed metrics | Result notes exist; progressive disclosure incomplete |
@@ -168,7 +168,7 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Persistence | Browser session only | Account-optional saved decisions | Not started |
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
-| Automated tests | 29 Python tests plus 16 web API/unit tests and TypeScript/lint/build checks | Domain, component, integration, end-to-end, and accessibility tests | Partial |
+| Automated tests | 29 Python tests plus 21 web calculation, journey, API, and adapter tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
 | Deployment | Local application | GitHub-backed hosted environments | Not configured |
 
 ## 8. Delivery roadmap
@@ -220,19 +220,19 @@ Acceptance criteria:
 
 ### `0.3.0` — Future Me MVP
 
-**State:** Planned<br>
+**State:** Implemented and verified on `main`; commit and publication pending<br>
 **Target outcome:** A user can turn a goal into an understandable plan and compare realistic ways to close the gap.
 
 Acceptance criteria:
 
-- [ ] Replace calculator tabs with a guided goal-selection flow.
-- [ ] Support first crore, home, financial freedom, and custom goals.
-- [ ] Ask only essential inputs, progressively.
-- [ ] Produce one plain-language Read.
-- [ ] Add What If? controls for contribution, time, inflation, and return.
-- [ ] Add a Reality Check for assumptions and emergency preparedness.
-- [ ] End with no more than three Your Move options.
-- [ ] Add calculation unit tests and journey-level interaction tests.
+- [x] Replace calculator tabs with a guided goal-selection flow.
+- [x] Support first crore, home, financial freedom, and custom goals.
+- [x] Ask only essential inputs, progressively.
+- [x] Produce one plain-language Read.
+- [x] Add What If? controls for contribution, time, inflation, and return.
+- [x] Add a Reality Check for assumptions and emergency preparedness.
+- [x] End with no more than three Your Move options.
+- [x] Add calculation unit tests and journey-level interaction tests.
 
 ### `0.4.0` — Money Mirror MVP
 
@@ -302,6 +302,52 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.3.0-dev` — Future Me guided decision experience
+
+**Date:** 27 October 2026<br>
+**Implementation commit:** Pending<br>
+**Git state:** Verified locally; publication to `origin/main` pending
+
+#### Product changes
+
+- Replaced five calculator tabs and dense number fields with one coherent goal-planning journey.
+- Added first crore, home, financial freedom, and personal goal cards with sensible starting points.
+- Added tactile range controls for the goal, savings, monthly contribution, and time horizon.
+- Moved return, inflation, and annual contribution increases into progressive disclosure.
+- Added a live plain-language Read, funding indicator, contribution-versus-growth split, and trajectory.
+- Added a Reality Check for emergency preparedness and a conservative lower-return outcome.
+- Added three actionable Your Move options that directly update the plan.
+- Removed DCF, tax, trading, multiplier, and generic allocation tools from the primary consumer journey.
+
+#### Production details
+
+- Added route-specific title and description metadata.
+- Added visible keyboard focus treatment and semantic pressed, live-region, fieldset, slider, and output behavior.
+- Removed mobile page overflow at 375px while preserving swipeable navigation.
+- Added exact singular/plural action copy and aligned rounded contribution suggestions with applied values.
+- Added deterministic calculation bounds for return, inflation, annual step-up, time, and negative inputs.
+
+#### Code changed
+
+- `apps/web/app/tools/page.tsx` — complete guided Future Me interface.
+- `apps/web/app/tools/layout.tsx` — route metadata.
+- `apps/web/app/globals.css` — tactile controls, responsive studio, cards, results, and accessibility states.
+- `apps/web/lib/calculations.ts` — future-plan projection, required contribution, downside scenario, and extension calculation.
+- `apps/web/lib/calculations.test.ts` — deterministic financial calculation coverage.
+- `apps/web/app/tools/page.test.tsx` — goal, slider, decision-copy, and readiness interaction coverage.
+- `apps/web/package.json`, `package-lock.json`, and `apps/web/vitest.config.mjs` — browser-like journey-test support.
+
+#### Verification
+
+- TypeScript: passed.
+- ESLint: passed with zero warnings.
+- Vitest: 21 tests passed across six files.
+- Next.js production build: passed; eleven routes generated.
+- Python regression suite: 29 tests passed.
+- Dependency audit: zero known vulnerabilities.
+- Browser interaction QA: goal switching, live calculations, action states, desktop composition, and 375px mobile behavior passed.
+- Mobile overflow check: document width equals viewport width; swipeable navigation scrollbar hidden.
 
 ### `0.2.1-dev` — Backend reliability foundation
 
@@ -445,13 +491,13 @@ The imported repository indicates that the project began as a Streamlit decision
 | 27 Oct 2026 | Use a Renaissance-inspired, modern-interaction design language | The product needs an identity distinct from generic fintech dashboards | Ornament must remain subordinate to accessibility and clarity |
 | 27 Oct 2026 | Keep deterministic calculation separate from optional AI explanation | Financial outputs must remain reproducible and auditable | AI may explain a result but cannot silently produce the underlying answer |
 | 27 Oct 2026 | Normalize and validate all third-party data at the server boundary | External schemas and outages must not leak unpredictable behavior into financial journeys | UI consumers receive stable shapes, bounded failures, request IDs, and explicit caching |
+| 27 Oct 2026 | Make Future Me one planning journey instead of a tool catalogue | Young users need a clear decision path, not a choice between finance calculators | Non-core valuation, tax, trade, multiplier, and allocation tools are removed from the primary route |
 
 ## 11. Known gaps and risks
 
 ### Product gaps
 
-- Current internal pages still look and behave like calculators rather than guided decisions.
-- Future Me contains tools that should be removed or hidden from the primary journey.
+- Money Mirror, Fund Match, Deep Dive, and How we math still look and behave like utilities rather than guided decisions.
 - Money Mirror does not yet analyse sectors, asset classes, or cross-fund overlap.
 - Fund Match analyses one scheme at a time and does not yet measure personal fit.
 - Your Move has not been implemented in any working result flow.
