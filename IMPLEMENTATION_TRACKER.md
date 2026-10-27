@@ -3,10 +3,10 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 28 October 2026<br>
-> **Current tracked version:** `0.4.1-dev`<br>
-> **Current phase:** Brand identity refresh alongside Money Mirror development<br>
+> **Current tracked version:** `0.4.2-dev`<br>
+> **Current phase:** Verified financial-correctness and trust remediation<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `34dba55` on `main`
+> **Latest implementation milestone:** `4f5aa6d` on `main`
 
 ## 1. End goal
 
@@ -168,7 +168,7 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Persistence | Browser session only | Account-optional saved decisions | Not started |
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
-| Automated tests | 29-test legacy baseline plus 26 current web calculation, journey, API, adapter, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
+| Automated tests | 29-test legacy baseline plus 31 current web calculation, journey, API, adapter, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
 | Deployment | Local application | GitHub-backed hosted environments | Not configured |
 
 ## 8. Delivery roadmap
@@ -302,6 +302,46 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.2-dev` — Verified audit remediation
+
+**Date:** 28 October 2026<br>
+**Implementation commit:** `4f5aa6d`<br>
+**Git state:** Audit-remediation milestone pushed to `origin/main`
+
+#### Confirmed correctness fixes
+
+- Rebuilt Deep Dive portfolio history from equal-weight daily returns instead of averaging unlike raw share prices.
+- Annualise the realised compounded return path instead of compounding the arithmetic mean return.
+- Validate holding periods as whole numbers from 1 to 30 and portfolio values as positive finite amounts before requesting data.
+- Fail explicitly when aligned history or Monte Carlo observations are insufficient; never substitute a missing risk result with zero.
+- Surface failed and short-history symbols, the symbols actually used, and the common-date observation count.
+- Correct the Yahoo disclosure to say closing prices, not dividend-adjusted total returns.
+- Treat every Future Me target, including First Crore, as a value in today's money and inflate the future target visibly.
+- Classify a plan as On track only when the 2%-lower-return scenario also reaches the target; show the conservative corpus alongside the base case.
+- Floor funded percentages, keep savings within the target-dependent control range, and prevent suggested monthly or time changes from exceeding planner limits.
+- Leave emergency-cushion readiness unanswered until the user chooses a native radio option; block a contradictory contribution increase after “Still building it.”
+
+#### Confirmed trust and reliability fixes
+
+- Limit Fund Match results to Direct Growth schemes, excluding Regular and IDCW variants.
+- Clear the previous fund before a new selection loads and handle non-JSON failures without leaking parser errors.
+- Replace broad privacy claims with the accurate “No account · session only” description.
+- Add dedicated metadata for Deep Dive and Fund Match.
+
+#### Deliberately not changed from the external audit
+
+- Did not apply the proposed wholesale visual redesign, Tailwind migration, animation libraries, or naming rewrite; these are product-direction choices, not verified defects.
+- Did not delete legacy calculation exports or retire Streamlit without a completed parity and migration decision.
+- Did not change tax logic, regulated suitability language, or market-data providers without legal, tax, licensing, and architecture review.
+- Did not add a restrictive CSP without a nonce design for the existing Next.js runtime and inline theme bootstrap.
+- Money Mirror CSV, duplicate, validation, pricing, metadata, and journey-test findings were already outdated in the audited snapshot and required no new fix.
+
+#### Verification
+
+- Vitest: 31 tests passed across ten files, including new equal-weight, geometric-return, risk-validation, omission-disclosure, and fund-plan-filter tests.
+- TypeScript passed; ESLint passed with zero warnings; Next.js production build passed for all 12 routes.
+- Rendered Future Me and Deep Dive production pages were checked for corrected copy, state, outputs, metadata, and viewport overflow.
 
 ### `0.4.1-dev` — Paisaan identity refresh
 
@@ -558,6 +598,7 @@ The imported repository indicates that the project began as a Streamlit decision
 | 27 Oct 2026 | Normalize and validate all third-party data at the server boundary | External schemas and outages must not leak unpredictable behavior into financial journeys | UI consumers receive stable shapes, bounded failures, request IDs, and explicit caching |
 | 27 Oct 2026 | Make Future Me one planning journey instead of a tool catalogue | Young users need a clear decision path, not a choice between finance calculators | Non-core valuation, tax, trade, multiplier, and allocation tools are removed from the primary route |
 | 27 Oct 2026 | Keep the Money Mirror assistant deterministic and contextual | An assistant should reduce data-entry confusion without becoming an unaudited financial engine | Guidance can explain CSVs, symbols, failures, and results but cannot alter calculations or invent prices |
+| 28 Oct 2026 | Treat external audits as evidence to verify, not implementation instructions | Audit snapshots can be stale and redesign recommendations can exceed verified defects | Reproduce claims against current code; implement confirmed correctness and trust issues only |
 
 ## 11. Known gaps and risks
 
