@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { PrimaryNav } from "@/components/primary-nav";
 import { ThemeControl } from "@/components/theme-control";
 import "./globals.css";
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <a className="skip-link" href="#main-content">Skip to content</a>
     <div className="app-shell">
       <header className="site-header">
-        <Link href="/" className="brand" aria-label="Paisaan home"><span className="brand-mark" aria-hidden="true"><i>P</i></span><span><strong>Paisaan</strong><small>by CapitalSense</small></span></Link>
+        <Link href="/" className="brand" aria-label="Paisaan home"><BrandLogo /></Link>
         <p className="product-label"><i /> Private by design</p>
       </header>
       <div className="nav-shell"><PrimaryNav /></div>
