@@ -5,6 +5,7 @@
 > **Last updated:** 27 October 2026<br>
 > **Current tracked version:** `0.2.0-dev`<br>
 > **Current phase:** Product consolidation and experience redesign<br>
+> **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
 > **Git baseline:** `b8cc842` on `main`
 
 ## 1. End goal
@@ -288,7 +289,8 @@ Acceptance criteria:
 ### `0.2.0-dev` — Paisaan experience redesign
 
 **Date:** 27 October 2026<br>
-**Git state:** Development milestone tracked on `main`; final `0.2.0` tag pending approval
+**Implementation commit:** `260bc25`<br>
+**Git state:** Development milestone pushed to `origin/main`; final `0.2.0` tag pending approval
 
 #### Product changes
 
