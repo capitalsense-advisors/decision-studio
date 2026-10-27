@@ -1,0 +1,17 @@
+{
+  "name": "capitalsense-decision-studio",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "workspaces": ["apps/web"],
+  "devDependencies": {
+    "next": "16.4.2"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @capitalsense/decision-studio-web",
+    "build": "npm run build --workspace @capitalsense/decision-studio-web",
+    "lint": "npm run lint --workspace @capitalsense/decision-studio-web",
+    "typecheck": "npm run typecheck --workspace @capitalsense/decision-studio-web"
+  }
+}

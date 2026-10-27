@@ -1,0 +1,35 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local tooling and editor state
+.codex-review/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
