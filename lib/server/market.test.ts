@@ -32,4 +32,3 @@ describe("market validation and normalization", () => {
     ]);
   });
 });
-

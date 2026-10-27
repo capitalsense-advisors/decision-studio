@@ -8,7 +8,6 @@ const SYMBOL = /^[A-Z0-9.^&-]{1,24}$/;
 export function parseMarket(value: string | null): Market | null {
   return value === "india" || value === "us" ? value : null;
 }
-
 export function parseSymbols(value: string | null) {
   if (!value || value.length > 300) return { symbols: [], invalid: [] };
   const entries = value.split(",").map((item) => item.trim().toUpperCase()).filter(Boolean);
@@ -45,4 +44,3 @@ export function normalizeYahooChart(payload: unknown): PricePoint[] {
   if (!points.length) invalidPayload();
   return points;
 }
-

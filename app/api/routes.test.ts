@@ -10,7 +10,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
-
 describe("API routes", () => {
   it("returns a no-store health response", async () => {
     const response = await health();
@@ -107,4 +106,3 @@ describe("API routes", () => {
     expect(body.requestId).toBe(response.headers.get("x-request-id"));
   });
 });
-
