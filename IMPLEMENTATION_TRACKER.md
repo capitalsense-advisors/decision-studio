@@ -203,7 +203,7 @@ Acceptance criteria:
 
 ### `0.2.1` — Backend reliability foundation
 
-**State:** Implemented and verified; commit and remote publication pending<br>
+**State:** Published to `origin/main`<br>
 **Target outcome:** Financial data journeys fail safely, return predictable data, and remain diagnosable when an external provider is unavailable.
 
 Acceptance criteria:
@@ -216,7 +216,7 @@ Acceptance criteria:
 - [x] Add a lightweight service-health endpoint.
 - [x] Cover adapters and route behavior with automated tests.
 - [x] Pass TypeScript, lint, production build, Python regression tests, dependency audit, and live API smoke tests.
-- [ ] Commit and push the verified increment to `origin/main`.
+- [x] Commit and push the verified increment to `origin/main`.
 
 ### `0.3.0` — Future Me MVP
 
@@ -306,8 +306,8 @@ Acceptance criteria:
 ### `0.2.1-dev` — Backend reliability foundation
 
 **Date:** 27 October 2026<br>
-**Implementation commit:** Pending<br>
-**Git state:** Verified locally; publication to `origin/main` pending
+**Implementation commit:** `340a024`<br>
+**Git state:** Backend milestone pushed to `origin/main`
 
 #### Reliability changes
 

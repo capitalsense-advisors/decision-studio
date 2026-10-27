@@ -17,7 +17,6 @@ export function normalizeFundSearch(payload: unknown): FundScheme[] {
   }
   return [...unique.values()];
 }
-
 export function normalizeFundDetail(payload: unknown) {
   if (!isRecord(payload)) invalidPayload();
 
@@ -40,4 +39,3 @@ export function normalizeFundDetail(payload: unknown) {
 
   return { meta, points: [...unique.values()].sort((a, b) => a.date.localeCompare(b.date)) };
 }
-
