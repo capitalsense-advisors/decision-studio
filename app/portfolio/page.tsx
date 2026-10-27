@@ -1,37 +1,211 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Metric, PageHeading } from "@/components/ui";
+import { useMemo, useRef, useState } from "react";
+
+import { ResultNotes } from "@/components/ui";
 import { money, percent } from "@/lib/format";
+import { analyzePortfolio, createHolding, latestPrices, normalizeSymbol, parseHoldingsCsv, validateHoldings, type AssetType, type HoldingDraft, type Market } from "@/lib/portfolio";
 
-type Holding = { symbol: string; quantity: number; averageCost: number; currentPrice: number; value: number };
-const sample: Holding[] = [
-  { symbol:"RELIANCE", quantity:20, averageCost:2400, currentPrice:2900, value:58000 },
-  { symbol:"HDFCBANK", quantity:40, averageCost:1500, currentPrice:1700, value:68000 },
-  { symbol:"INFY", quantity:30, averageCost:1350, currentPrice:1600, value:48000 },
+const SAMPLE: HoldingDraft[] = [
+  createHolding({ id: "sample-1", symbol: "RELIANCE", quantity: 20, averageCost: 2400 }),
+  createHolding({ id: "sample-2", symbol: "HDFCBANK", quantity: 40, averageCost: 1500 }),
+  createHolding({ id: "sample-3", symbol: "INFY", quantity: 30, averageCost: 1350 }),
+  createHolding({ id: "sample-4", symbol: "TCS", quantity: 12, averageCost: 3200 }),
 ];
-const blank = (): Holding => ({symbol:"",quantity:0,averageCost:0,currentPrice:0,value:0});
 
-export default function PortfolioPage(){
-  const [rows,setRows]=useState<Holding[]>([blank()]);
-  const [confirmed,setConfirmed]=useState<Holding[]|null>(null);
-  const [message,setMessage]=useState("");
-  const stats=useMemo(()=>{
-    if(!confirmed?.length)return null;
-    const normalized=confirmed.map(row=>({...row,value:row.value>0?row.value:row.quantity*row.currentPrice}));
-    const total=normalized.reduce((sum,row)=>sum+row.value,0);
-    const invested=normalized.reduce((sum,row)=>sum+row.quantity*row.averageCost,0);
-    const weighted=normalized.map(row=>({...row,weight:total?row.value/total:0})).sort((a,b)=>b.weight-a.weight);
-    const hhi=weighted.reduce((sum,row)=>sum+row.weight*row.weight,0);
-    return {total,invested,gain:total-invested,weighted,hhi,assessment:weighted[0]?.weight>=.35||hhi>=.25?"High concentration":weighted[0]?.weight>=.2?"Moderate concentration":"Diversified"};
-  },[confirmed]);
+type Stage = "choose" | "review" | "mirror";
+type AssistantTopic = "start" | "csv" | "symbols" | "prices" | "read";
 
-  function update(index:number,key:keyof Holding,value:string){setConfirmed(null);setRows(current=>current.map((row,i)=>i===index?{...row,[key]:key==="symbol"?value.toUpperCase():Number(value)}:row))}
-  async function importCsv(file:File){const text=await file.text();const lines=text.split(/\r?\n/).filter(Boolean);if(lines.length<2){setMessage("The CSV has no holding rows.");return}const headers=lines[0].split(",").map(item=>item.trim().toLowerCase().replaceAll(" ","_"));const parsed=lines.slice(1,101).map(line=>{const cells=line.split(",");const at=(...names:string[])=>{const index=headers.findIndex(h=>names.includes(h));return index>=0?cells[index]?.trim():""};return {symbol:at("symbol","ticker").toUpperCase(),quantity:Number(at("quantity","qty"))||0,averageCost:Number(at("average_cost","avg_price","buy_price"))||0,currentPrice:Number(at("current_price","price","ltp"))||0,value:Number(at("value","market_value"))||0}}).filter(row=>row.symbol);setRows(parsed.length?parsed:[blank()]);setConfirmed(null);setMessage(parsed.length?"CSV loaded for review. Confirm the table before analysis.":"No valid symbol rows were found.");}
-  function confirm(){const valid=rows.filter(row=>row.symbol.trim()&&(row.value>0||(row.quantity>0&&row.currentPrice>0)));setConfirmed(valid.length?valid:null);setMessage(valid.length?"Holdings confirmed for this browser session.":"Add a symbol and either market value or quantity with current price.");}
+export default function PortfolioPage() {
+  const [stage, setStage] = useState<Stage>("choose");
+  const [market, setMarket] = useState<Market>("india");
+  const [rows, setRows] = useState<HoldingDraft[]>([]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [failures, setFailures] = useState<string[]>([]);
+  const [assistantOpen, setAssistantOpen] = useState(true);
+  const [assistantTopic, setAssistantTopic] = useState<AssistantTopic>("start");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const issues = useMemo(() => validateHoldings(rows), [rows]);
+  const analysis = useMemo(() => analyzePortfolio(rows), [rows]);
 
-  return <div className="page-stack"><PageHeading kicker="Holdings" title={<>Add, check, then<br/><span>analyse your portfolio.</span></>} copy="Nothing is analysed until you confirm the editable table. Your holdings remain in this browser session and are not permanently stored."/>
-    <section className="panel"><div className="section-heading"><div><span className="eyebrow">Step 1</span><h2>Add holdings</h2></div><p>Use the sample, import a CSV, or edit rows directly.</p></div><div className="form-actions"><button className="button secondary" onClick={()=>{setRows(sample);setConfirmed(null);setMessage("Sample loaded for review.");}}>Load sample portfolio</button><label className="button secondary" style={{cursor:"pointer"}}>Import CSV<input hidden type="file" accept=".csv,text/csv" onChange={e=>e.target.files?.[0]&&void importCsv(e.target.files[0])}/></label><button className="button secondary" onClick={()=>setRows(current=>[...current,blank()])}>Add row</button></div>{message&&<p className="notice" role="status">{message}</p>}<div className="table-scroll"><table className="holdings-table"><thead><tr><th>Symbol</th><th>Quantity</th><th>Average cost</th><th>Current price</th><th>Market value</th><th></th></tr></thead><tbody>{rows.map((row,index)=><tr key={index}><td><input aria-label={"Symbol row "+(index+1)} value={row.symbol} onChange={e=>update(index,"symbol",e.target.value)}/></td><td><input type="number" value={row.quantity} onChange={e=>update(index,"quantity",e.target.value)}/></td><td><input type="number" value={row.averageCost} onChange={e=>update(index,"averageCost",e.target.value)}/></td><td><input type="number" value={row.currentPrice} onChange={e=>update(index,"currentPrice",e.target.value)}/></td><td><input type="number" value={row.value} onChange={e=>update(index,"value",e.target.value)}/></td><td><button className="button secondary" onClick={()=>{setRows(current=>current.filter((_,i)=>i!==index));setConfirmed(null)}}>Remove</button></td></tr>)}</tbody></table></div><div className="form-actions"><button className="button" onClick={confirm}>Confirm holdings for analysis</button></div></section>
-    {!stats?<section className="state-panel"><span className="eyebrow">Waiting for confirmation</span><h2>Your analysis will appear here.</h2><p>Confirmation prevents an imported draft from being mistaken for verified data.</p></section>:<section className="panel"><div className="section-heading"><div><span className="eyebrow">Portfolio health</span><h2>{stats.assessment}</h2></div><p>Concentration describes allocation—not quality, suitability, or future return.</p></div><div className="metric-grid"><Metric label="Current value" value={money(stats.total,true)}/><Metric label="Invested amount" value={money(stats.invested,true)}/><Metric label="Unrealised return" value={percent(stats.invested?stats.gain/stats.invested:null)} note={money(stats.gain,true)}/><Metric label="Top holding" value={percent(stats.weighted[0]?.weight)} note={stats.weighted[0]?.symbol}/></div><div className="table-scroll"><table className="holdings-table"><thead><tr><th>Stock</th><th>Value</th><th>Weight</th><th>Allocation</th></tr></thead><tbody>{stats.weighted.map(row=><tr key={row.symbol}><td><strong>{row.symbol}</strong></td><td>{money(row.value)}</td><td>{percent(row.weight)}</td><td style={{minWidth:180}}><div className="allocation-bar"><i style={{width:(row.weight*100)+"%"}}/></div></td></tr>)}</tbody></table></div></section>}
-  </div>
+  function beginManual() {
+    setRows([createHolding()]);
+    setStage("review");
+    setAssistantTopic("symbols");
+    setMessage("Add up to 10 holdings. Nothing is analysed until prices are checked.");
+  }
+
+  function loadSample() {
+    setRows(SAMPLE.map((row) => ({ ...row })));
+    setStage("review");
+    setAssistantTopic("prices");
+    setMessage("Sample loaded. Check the quantities and average costs, then fetch prices.");
+  }
+
+  async function importCsv(file: File) {
+    if (file.size > 250_000) {
+      setMessage("That file is too large. Use a CSV under 250 KB with no more than 10 holdings.");
+      return;
+    }
+    const parsed = parseHoldingsCsv(await file.text());
+    if (!parsed.rows.length) {
+      setMessage(parsed.issues[0]?.message ?? "No usable holdings were found.");
+      return;
+    }
+    setRows(parsed.rows);
+    setStage("review");
+    setAssistantTopic(parsed.issues.length ? "csv" : "prices");
+    setMessage(parsed.issues.length ? parsed.issues.map((issue) => issue.message).join(" ") : `${parsed.rows.length} holdings imported for review.`);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function update(id: string, key: keyof HoldingDraft, value: string) {
+    setStage("review");
+    setFailures([]);
+    setRows((current) => current.map((row) => {
+      if (row.id !== id) return row;
+      if (key === "symbol") return { ...row, symbol: normalizeSymbol(value), currentPrice: null, priceDate: null, priceSource: "missing" };
+      if (key === "assetType") return { ...row, assetType: value as AssetType };
+      if (key === "currentPrice") return { ...row, currentPrice: value === "" ? null : Math.max(0, Number(value)), priceDate: new Date().toISOString().slice(0, 10), priceSource: value === "" ? "missing" : "manual" };
+      return { ...row, [key]: Math.max(0, Number(value)) };
+    }));
+  }
+
+  function changeMarket(next: Market) {
+    if (next === market) return;
+    setMarket(next);
+    setStage("review");
+    setFailures([]);
+    setRows((current) => current.map((row) => row.priceSource === "yahoo" ? { ...row, currentPrice: null, priceDate: null, priceSource: "missing" } : row));
+    setMessage("Exchange changed. Check Yahoo prices again before revealing the mirror.");
+    setAssistantTopic("prices");
+  }
+
+  async function refreshPrices() {
+    const currentIssues = validateHoldings(rows);
+    if (currentIssues.length) {
+      setMessage(`Fix ${currentIssues.length} highlighted ${currentIssues.length === 1 ? "issue" : "issues"} before checking prices.`);
+      setAssistantTopic("symbols");
+      return;
+    }
+    setLoading(true);
+    setMessage("Checking recent closing prices…");
+    setFailures([]);
+    try {
+      const symbols = rows.map((row) => normalizeSymbol(row.symbol));
+      const response = await fetch(`/api/market/history?market=${market}&symbols=${encodeURIComponent(symbols.join(","))}`);
+      const body = await response.json() as { detail?: string; series?: Record<string, Array<{ date: string; value: number }>>; failures?: string[] };
+      if (!response.ok || !body.series) throw new Error(body.detail ?? "Prices are temporarily unavailable.");
+      const latest = latestPrices(body.series);
+      const missing = (body.failures ?? []).filter((symbol) => {
+        const row = rows.find((item) => normalizeSymbol(item.symbol) === symbol);
+        return !row?.currentPrice;
+      });
+      setRows((current) => current.map((row) => {
+        const point = latest[normalizeSymbol(row.symbol)];
+        return point ? { ...row, currentPrice: point.value, priceDate: point.date, priceSource: "yahoo" } : row;
+      }));
+      setFailures(missing);
+      setMessage(missing.length ? `Prices loaded for ${rows.length - missing.length} holdings. Add a manual price for ${missing.join(", ")} or remove them.` : `Prices checked for all ${rows.length} holdings.`);
+      setAssistantTopic(missing.length ? "prices" : "read");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Prices are temporarily unavailable. Your draft is unchanged.");
+      setAssistantTopic("prices");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function revealMirror() {
+    if (!analysis) {
+      setMessage("Every analysed holding needs a recent Yahoo price or a manually entered price.");
+      setAssistantTopic("prices");
+      return;
+    }
+    setStage("mirror");
+    setAssistantTopic("read");
+    setMessage("");
+  }
+
+  return (
+    <div className="mirror-page">
+      <header className="mirror-hero">
+        <div><span className="eyebrow">Money Mirror · private portfolio check</span><h1>See the shape of<br /><em>what you own.</em></h1><p>Bring holdings, verify prices, then reveal the one portfolio pattern worth noticing first. Your draft stays in this browser tab.</p></div>
+        <div className="mirror-orbit" aria-hidden="true"><i /><i /><span>MM</span></div>
+      </header>
+
+      <nav className="mirror-progress" aria-label="Money Mirror progress">
+        {(["choose", "review", "mirror"] as Stage[]).map((item, index) => <span key={item} className={stage === item ? "active" : (["choose", "review", "mirror"].indexOf(stage) > index ? "done" : "")}><i>{index + 1}</i>{item === "choose" ? "Bring holdings" : item === "review" ? "Check the data" : "Read the mirror"}</span>)}
+      </nav>
+
+      {stage === "choose" && <section className="mirror-entry" aria-labelledby="entry-title">
+        <div className="future-section-title"><span>01</span><div><p>A safe beginning</p><h2 id="entry-title">How would you like to start?</h2></div></div>
+        <div className="entry-cards">
+          <button type="button" onClick={() => fileRef.current?.click()}><span>Fastest</span><i>↥</i><strong>Import a CSV</strong><small>Symbol, quantity and average cost. You review everything before analysis.</small></button>
+          <button type="button" onClick={beginManual}><span>Most control</span><i>＋</i><strong>Add them gently</strong><small>One compact holding card at a time—no spreadsheet wall.</small></button>
+          <button type="button" onClick={loadSample}><span>Explore first</span><i>◎</i><strong>Try a sample</strong><small>See the complete journey using four Indian stocks.</small></button>
+        </div>
+        <input ref={fileRef} hidden type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && void importCsv(event.target.files[0])} />
+        <p className="privacy-note"><b>Private by design.</b> CSV contents are parsed in your browser and are not uploaded. Only ticker symbols are sent to the price endpoint.</p>
+      </section>}
+
+      {stage !== "choose" && <section className="mirror-workspace" aria-labelledby="review-title">
+        <div className="mirror-review">
+          <div className="future-section-title compact"><span>02</span><div><p>Review before analysis</p><h2 id="review-title">Make the data yours.</h2></div></div>
+          <div className="market-toggle" aria-label="Stock exchange"><button type="button" className={market === "india" ? "active" : ""} aria-pressed={market === "india"} onClick={() => changeMarket("india")}>India · NSE</button><button type="button" className={market === "us" ? "active" : ""} aria-pressed={market === "us"} onClick={() => changeMarket("us")}>United States</button></div>
+          {message && <p className="mirror-notice" role="status">{message}</p>}
+          <div className="holding-cards">
+            {rows.map((row, index) => {
+              const rowIssues = issues.filter((issue) => issue.row === index + 1);
+              return <article className={rowIssues.length ? "holding-card invalid" : "holding-card"} key={row.id}>
+                <header><span>Holding {String(index + 1).padStart(2, "0")}</span><button type="button" aria-label={`Remove ${row.symbol || `holding ${index + 1}`}`} onClick={() => setRows((current) => current.filter((item) => item.id !== row.id))}>Remove</button></header>
+                <div className="holding-fields">
+                  <label><span>Symbol</span><input aria-label={`Symbol holding ${index + 1}`} value={row.symbol} placeholder={market === "india" ? "RELIANCE" : "AAPL"} onChange={(event) => update(row.id, "symbol", event.target.value)} /></label>
+                  <label><span>Quantity</span><input aria-label={`Quantity ${row.symbol || index + 1}`} type="number" min="0" step="any" value={row.quantity || ""} placeholder="20" onChange={(event) => update(row.id, "quantity", event.target.value)} /></label>
+                  <label><span>Average cost</span><input aria-label={`Average cost ${row.symbol || index + 1}`} type="number" min="0" step="any" value={row.averageCost || ""} placeholder="2400" onChange={(event) => update(row.id, "averageCost", event.target.value)} /></label>
+                  <label><span>Asset type</span><select aria-label={`Asset type ${row.symbol || index + 1}`} value={row.assetType} onChange={(event) => update(row.id, "assetType", event.target.value)}><option value="stock">Stock</option><option value="fund">Fund / ETF</option><option value="gold">Gold</option><option value="debt">Debt</option><option value="cash">Cash</option></select></label>
+                </div>
+                <footer><label><span>{row.priceSource === "yahoo" ? "Yahoo close" : "Current price"}</span><input aria-label={`Current price ${row.symbol || index + 1}`} type="number" min="0" step="any" value={row.currentPrice ?? ""} placeholder="Fetch or enter" onChange={(event) => update(row.id, "currentPrice", event.target.value)} /></label><p className={`price-badge ${row.priceSource}`}>{row.priceSource === "yahoo" ? `Yahoo · ${row.priceDate}` : row.priceSource === "manual" ? `Manual · ${row.priceDate}` : "Price needed"}</p></footer>
+                {rowIssues.map((issue) => <p className="field-issue" key={`${issue.field}-${issue.message}`}>{issue.message}</p>)}
+              </article>;
+            })}
+          </div>
+          <div className="review-actions"><button type="button" className="button secondary" disabled={rows.length >= 10} onClick={() => setRows((current) => [...current, createHolding()])}>＋ Add holding</button><button type="button" className="button secondary" disabled={loading || !rows.length} onClick={() => void refreshPrices()}>{loading ? "Checking prices…" : "Check Yahoo prices"}</button><button type="button" className="button" disabled={!analysis || issues.length > 0 || loading} onClick={revealMirror}>Reveal my mirror</button></div>
+          <p className="source-line">Yahoo Finance closing prices · cached for one hour · manual prices are clearly marked · failed symbols never overwrite your draft.</p>
+        </div>
+
+        {stage === "mirror" && analysis && <MirrorResult analysis={analysis} failures={failures} />}
+      </section>}
+
+      <MirrorAssistant open={assistantOpen} topic={assistantTopic} stage={stage} issues={issues.length} failures={failures} onOpen={() => setAssistantOpen((current) => !current)} onTopic={setAssistantTopic} />
+    </div>
+  );
+}
+
+function MirrorResult({ analysis, failures }: { analysis: NonNullable<ReturnType<typeof analyzePortfolio>>; failures: string[] }) {
+  const top = analysis.weighted[0];
+  const read = analysis.assessment === "Focused" ? `${top.symbol} is doing too much of the portfolio's work.` : analysis.assessment === "Watch concentration" ? `Your portfolio has variety, but its weight still gathers near the top.` : "No single holding dominates this snapshot.";
+  return <div className="mirror-result" aria-live="polite">
+    <header><span>The Read</span><i>{analysis.assessment}</i></header><h2>{read}</h2><p>{top.symbol} represents <b>{percent(top.weight)}</b> of the priced portfolio. The top three together represent <b>{percent(analysis.topThreeWeight)}</b>.</p>
+    <div className="mirror-metrics"><article><span>Current value</span><strong>{money(analysis.totalValue, true)}</strong></article><article><span>Unrealised return</span><strong className={analysis.gain < 0 ? "negative" : ""}>{percent(analysis.gainRate)}</strong><small>{money(analysis.gain, true)}</small></article><article><span>Effective holdings</span><strong>{analysis.effectiveHoldings.toFixed(1)}</strong><small>Concentration-adjusted</small></article></div>
+    <div className="weight-list" aria-label="Holding allocation">{analysis.weighted.map((row, index) => <div key={row.id}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{row.symbol}</b><small>{money(row.value, true)}</small></span><strong>{percent(row.weight)}</strong><em><i style={{ width: `${row.weight * 100}%` }} /></em></div>)}</div>
+    <section className="asset-mix"><span>Asset mix</span><div>{analysis.assetMix.map((item) => <article key={item.assetType}><i style={{ "--mix": `${item.weight * 100}%` } as React.CSSProperties} /><b>{item.assetType === "fund" ? "Fund / ETF" : item.assetType[0].toUpperCase() + item.assetType.slice(1)}</b><strong>{percent(item.weight)}</strong></article>)}</div></section>
+    <section className="mirror-reality"><span>Reality Check</span><h3>{analysis.effectiveHoldings < analysis.weighted.length * .6 ? `You own ${analysis.weighted.length} lines, but concentration behaves more like ${analysis.effectiveHoldings.toFixed(1)} equal holdings.` : "The number of lines and the spread of risk are reasonably aligned."}</h3><p>This says nothing about whether a company is good or bad. It only shows how strongly one outcome can move the whole portfolio.</p></section>
+    <section className="mirror-moves"><span>Your Move</span><div><article><i>01</i><b>Review the top weight</b><p>Decide the maximum share one company should have before the market decides it for you.</p></article><article><i>02</i><b>Direct new money thoughtfully</b><p>New contributions can change weights without forcing an immediate sale or tax event.</p></article><article><i>03</i><b>Check the missing layer</b><p>Add funds, debt, gold and cash to see the whole household allocation—not only stocks.</p></article></div></section>
+    {failures.length > 0 && <p className="mirror-warning">Not included because no fresh price was available: {failures.join(", ")}.</p>}
+    <ResultNotes assumptions={["Values use quantity × the displayed current price.", "Concentration uses the Herfindahl index and position weights.", "Only holdings with a usable current price are included."]} warnings={["This is allocation analysis, not a judgement of security quality or a recommendation to trade."]} />
+  </div>;
+}
+
+function MirrorAssistant({ open, topic, stage, issues, failures, onOpen, onTopic }: { open: boolean; topic: AssistantTopic; stage: Stage; issues: number; failures: string[]; onOpen: () => void; onTopic: (topic: AssistantTopic) => void }) {
+  const copy: Record<AssistantTopic, { title: string; body: string }> = {
+    start: { title: "Let’s build a clean mirror", body: "Start with a CSV if you already have one. Manual entry is calmer for fewer than five holdings. You will always review before analysis." },
+    csv: { title: "A small, boring CSV is perfect", body: "Use headers: symbol, quantity, average_cost, and optionally asset_type. Exported broker files often need only those three columns renamed." },
+    symbols: { title: issues ? `${issues} data ${issues === 1 ? "detail needs" : "details need"} attention` : "Use exchange symbols, not company names", body: "For India enter RELIANCE or TCS—Paisaan adds the NSE suffix safely. Duplicate symbols should be merged so weights stay honest." },
+    prices: { title: failures.length ? "Some prices need your help" : "Prices are a checkpoint", body: failures.length ? `Yahoo could not return ${failures.join(", ")}. Enter a recent price manually or remove the row; the rest remain usable.` : "Check Yahoo prices after quantities and costs are clean. If the source is unavailable, your draft stays untouched and you can retry." },
+    read: { title: stage === "mirror" ? "Read weight before return" : "You’re ready for the mirror", body: stage === "mirror" ? "The first question is not ‘am I up?’ but ‘what single outcome matters too much?’ Effective holdings translates unequal weights into a more honest count." : "Reveal the mirror when every row has a valid symbol, positive quantity, non-negative cost and usable price." },
+  };
+  const current = copy[topic];
+  return <aside className={open ? "mirror-assistant open" : "mirror-assistant"} aria-label="Mirror Guide"><button type="button" className="assistant-toggle" aria-expanded={open} onClick={onOpen}><span aria-hidden="true">P</span>{open ? "Close guide" : "Need help?"}</button>{open && <div><span>Mirror Guide</span><h2>{current.title}</h2><p>{current.body}</p><nav aria-label="Assistant topics"><button type="button" onClick={() => onTopic("csv")}>CSV help</button><button type="button" onClick={() => onTopic("symbols")}>Symbols</button><button type="button" onClick={() => onTopic("prices")}>Prices</button><button type="button" onClick={() => onTopic("read")}>Read results</button></nav><small>Guidance is rule-based and never changes the calculation.</small></div>}</aside>;
 }
