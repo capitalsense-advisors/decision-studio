@@ -2,11 +2,11 @@
 
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
-> **Last updated:** 27 October 2026<br>
-> **Current tracked version:** `0.4.0-dev`<br>
-> **Current phase:** Money Mirror guided data and concentration experience<br>
+> **Last updated:** 28 October 2026<br>
+> **Current tracked version:** `0.4.1-dev`<br>
+> **Current phase:** Brand identity refresh alongside Money Mirror development<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `d76c2de` on `main`
+> **Latest implementation milestone:** `34dba55` on `main`
 
 ## 1. End goal
 
@@ -302,6 +302,27 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.1-dev` — Paisaan identity refresh
+
+**Date:** 28 October 2026<br>
+**Implementation commit:** `34dba55`<br>
+**Git state:** Identity milestone pushed to `origin/main`
+
+#### Brand and interface changes
+
+- Replaced the ornamental serif coin badge with an original continuous-ribbon **P** and saffron aperture.
+- Changed the lockup to a compact lowercase `paisaan.` wordmark with a restrained CapitalSense endorsement.
+- Added a responsive inline logo component with subtle hover motion and automatic reduced-motion support.
+- Added a matching SVG application icon for browser tabs and install surfaces.
+- Preserved high contrast in light and dark themes without duplicating brand assets.
+
+#### Verification
+
+- Passed all 26 automated web tests across eight files using a single worker to avoid local worker contention.
+- Passed TypeScript, ESLint with zero warnings, and the Next.js production build.
+- Visually verified the production render at desktop and 390 px mobile widths.
+- Confirmed a 42 px symbol, horizontal lockup alignment, centered desktop/mobile headers, and no viewport overflow.
 
 ### `0.4.0-dev` — Money Mirror guided portfolio workflow
 
