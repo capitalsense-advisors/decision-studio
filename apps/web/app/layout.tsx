@@ -25,7 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand" aria-label="Paisaan home"><BrandLogo /></Link>
-        <p className="product-label"><i /> Private by design</p>
+        <p className="product-label"><i /> No account required</p>
       </header>
       <div className="nav-shell"><PrimaryNav /></div>
       <main id="main-content">{children}</main>
