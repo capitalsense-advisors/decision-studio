@@ -1,24 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 
-const SYMBOL = /^[A-Z0-9.^&-]{1,24}$/;
+import { CACHE, fetchJson, jsonResponse, problemResponse, UpstreamFailure, upstreamProblem } from "@/lib/server/api";
+import { normalizeYahooChart, parseMarket, parseSymbols, yahooTicker } from "@/lib/server/market";
 
-type YahooChart = { chart?: { result?: Array<{ timestamp?: number[]; indicators?: { quote?: Array<{ close?: Array<number|null> }> } }> } };
+const ROUTE = "market-history";
 
 export async function GET(request: NextRequest) {
-  const market = request.nextUrl.searchParams.get("market") === "us" ? "us" : "india";
-  const symbols = [...new Set((request.nextUrl.searchParams.get("symbols") ?? "").split(",").map(item=>item.trim().toUpperCase()).filter(item=>SYMBOL.test(item)))].slice(0,10);
-  if (!symbols.length) return NextResponse.json({detail:"Provide at least one valid symbol."},{status:400});
+  const market = parseMarket(request.nextUrl.searchParams.get("market"));
+  if (!market) {
+    return problemResponse("Market must be either india or us.", 400, "INVALID_MARKET", ROUTE);
+  }
+
+  const { symbols, invalid } = parseSymbols(request.nextUrl.searchParams.get("symbols"));
+  if (invalid.length) {
+    return problemResponse(`Invalid symbol: ${invalid[0]}.`, 400, "INVALID_SYMBOL", ROUTE);
+  }
+  if (!symbols.length || symbols.length > 10) {
+    return problemResponse("Provide between 1 and 10 valid symbols.", 400, "INVALID_SYMBOL_COUNT", ROUTE);
+  }
+
   try {
-    const entries = await Promise.all(symbols.map(async symbol=>{
-      const ticker = market === "india" && !symbol.startsWith("^") ? symbol + ".NS" : symbol;
-      const response = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(ticker) + "?range=2y&interval=1d&events=history", {headers:{"User-Agent":"CapitalSense-Decision-Studio/1.0"}, next:{revalidate:3600}, signal:AbortSignal.timeout(10000)});
-      if(!response.ok) return [symbol,[]] as const;
-      const payload = await response.json() as YahooChart;
-      const result = payload.chart?.result?.[0]; const timestamps=result?.timestamp??[]; const closes=result?.indicators?.quote?.[0]?.close??[];
-      return [symbol,timestamps.map((timestamp,index)=>({date:new Date(timestamp*1000).toISOString().slice(0,10),value:closes[index]})).filter(point=>typeof point.value==="number")] as const;
+    const results = await Promise.all(symbols.map(async (symbol) => {
+      try {
+        const ticker = yahooTicker(symbol, market);
+        const payload = await fetchJson(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=2y&interval=1d&events=history`,
+          {
+            headers: { "User-Agent": "Paisaan/0.2 (+https://github.com/capitalsense-advisors/decision-studio)" },
+            revalidate: 3_600,
+          },
+        );
+        return { symbol, points: normalizeYahooChart(payload) };
+      } catch {
+        return { symbol, points: null };
+      }
     }));
-    return NextResponse.json({market,series:Object.fromEntries(entries)}, {headers:{"Cache-Control":"public, s-maxage=3600, stale-while-revalidate=7200"}});
-  } catch {
-    return NextResponse.json({detail:"Market history is temporarily unavailable."},{status:503});
+
+    const successful = results.filter((result): result is { symbol: string; points: NonNullable<typeof result.points> } => result.points !== null);
+    if (!successful.length) throw new UpstreamFailure("invalid-payload");
+
+    const failures = results.filter((result) => result.points === null).map((result) => result.symbol);
+    return jsonResponse(
+      { market, series: Object.fromEntries(successful.map(({ symbol, points }) => [symbol, points])), failures },
+      CACHE.market,
+    );
+  } catch (error) {
+    return upstreamProblem(error, "Market history is temporarily unavailable.", ROUTE);
   }
 }

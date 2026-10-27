@@ -11,7 +11,10 @@
   "scripts": {
     "dev": "npm run dev --workspace @capitalsense/decision-studio-web",
     "build": "npm run build --workspace @capitalsense/decision-studio-web",
+    "start": "npm run start --workspace @capitalsense/decision-studio-web",
     "lint": "npm run lint --workspace @capitalsense/decision-studio-web",
+    "test": "npm run test:web",
+    "test:web": "npm run test --workspace @capitalsense/decision-studio-web",
     "typecheck": "npm run typecheck --workspace @capitalsense/decision-studio-web"
   }
 }

@@ -3,8 +3,8 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 27 October 2026<br>
-> **Current tracked version:** `0.2.0-dev`<br>
-> **Current phase:** Product consolidation and experience redesign<br>
+> **Current tracked version:** `0.2.1-dev`<br>
+> **Current phase:** Backend reliability foundation<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
 > **Git baseline:** `b8cc842` on `main`
 
@@ -163,12 +163,12 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Legacy prototype | Streamlit application in `app.py` and `pages/` | Reference implementation until parity, then retire | Maintained temporarily |
 | Web calculations | TypeScript in `apps/web/lib/calculations.ts` | Tested shared domain layer | Partial |
 | Legacy calculations | Python in `core/` | Retire after verified parity | Active legacy |
-| Market data | Server routes and services | Reliable, cached, source-labelled adapters | Partial |
-| Mutual-fund data | AMFI-derived history via `mfapi.in` | Validated fund metadata, comparison, and freshness | Partial |
+| Market data | Validated, cached Yahoo adapter with bounded requests and partial-failure handling | Reliable, source-labelled adapters with monitoring and fallback | Partial |
+| Mutual-fund data | Validated, cached `mfapi.in` search and history adapters | Authoritative metadata, comparison, freshness, monitoring, and fallback | Partial |
 | Persistence | Browser session only | Account-optional saved decisions | Not started |
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
-| Automated tests | 29 Python tests plus TypeScript/lint/build checks | Domain, component, integration, and accessibility tests | Partial |
+| Automated tests | 29 Python tests plus 16 web API/unit tests and TypeScript/lint/build checks | Domain, component, integration, end-to-end, and accessibility tests | Partial |
 | Deployment | Local application | GitHub-backed hosted environments | Not configured |
 
 ## 8. Delivery roadmap
@@ -200,6 +200,23 @@ Acceptance criteria:
 - [ ] Review final copy and brand name with stakeholders.
 - [x] Commit and push the development milestone to the source-of-truth repository.
 - [ ] Tag the approved `0.2.0` release after visual QA and stakeholder review.
+
+### `0.2.1` — Backend reliability foundation
+
+**State:** Implemented and verified; commit and remote publication pending<br>
+**Target outcome:** Financial data journeys fail safely, return predictable data, and remain diagnosable when an external provider is unavailable.
+
+Acceptance criteria:
+
+- [x] Validate and bound every public API input.
+- [x] Validate external fund and market payloads before exposing them to the interface.
+- [x] Apply explicit upstream timeouts and consistent cache policies.
+- [x] Return stable error codes, request IDs, and safe user-facing messages.
+- [x] Preserve available market series when only some requested symbols fail.
+- [x] Add a lightweight service-health endpoint.
+- [x] Cover adapters and route behavior with automated tests.
+- [x] Pass TypeScript, lint, production build, Python regression tests, dependency audit, and live API smoke tests.
+- [ ] Commit and push the verified increment to `origin/main`.
 
 ### `0.3.0` — Future Me MVP
 
@@ -285,6 +302,42 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.2.1-dev` — Backend reliability foundation
+
+**Date:** 27 October 2026<br>
+**Implementation commit:** Pending<br>
+**Git state:** Verified locally; publication to `origin/main` pending
+
+#### Reliability changes
+
+- Added one server response layer for cache policy, upstream timeouts, structured failures, request IDs, and safe JSON responses.
+- Added runtime normalization for mutual-fund search results, fund NAV history, and Yahoo market history.
+- Bounded fund queries, scheme codes, market names, symbol formats, and batch size before any upstream call.
+- Added per-symbol partial-failure handling so one unavailable ticker does not discard valid market series.
+- Added `/api/health` for deployment and uptime probes.
+- Added root-level `start` and `test` commands for reproducible local and hosted operation.
+
+#### Code changed
+
+- `apps/web/lib/server/api.ts` — shared server fetch, timeout, cache, request-ID, and error behavior.
+- `apps/web/lib/server/funds.ts` — mutual-fund payload validation and normalization.
+- `apps/web/lib/server/market.ts` — market input parsing, ticker mapping, and Yahoo payload validation.
+- `apps/web/app/api/funds/**` — hardened fund search and NAV history endpoints.
+- `apps/web/app/api/market/history/route.ts` — bounded batch requests and partial-failure responses.
+- `apps/web/app/api/health/route.ts` — service-health endpoint.
+- `apps/web/**/*.test.ts` and `apps/web/vitest.config.mjs` — API and adapter test suite.
+- `package.json`, `apps/web/package.json`, and `package-lock.json` — test/start commands and Vitest dependency.
+
+#### Verification
+
+- TypeScript: passed.
+- ESLint: passed with zero warnings.
+- Vitest: 16 tests passed across four files.
+- Next.js production build: passed; eleven routes generated.
+- Python regression suite: 29 tests passed.
+- Dependency audit: zero known vulnerabilities at moderate severity or higher.
+- Production-mode smoke tests: health, real mutual-fund search, real India market history, and invalid-input error contract passed.
 
 ### `0.2.0-dev` — Paisaan experience redesign
 
@@ -391,6 +444,7 @@ The imported repository indicates that the project began as a Streamlit decision
 | 27 Oct 2026 | Make UI and ease of use the central USP | The primary audience should not need finance expertise to start | Every workflow must be outcome-first and progressively disclosed |
 | 27 Oct 2026 | Use a Renaissance-inspired, modern-interaction design language | The product needs an identity distinct from generic fintech dashboards | Ornament must remain subordinate to accessibility and clarity |
 | 27 Oct 2026 | Keep deterministic calculation separate from optional AI explanation | Financial outputs must remain reproducible and auditable | AI may explain a result but cannot silently produce the underlying answer |
+| 27 Oct 2026 | Normalize and validate all third-party data at the server boundary | External schemas and outages must not leak unpredictable behavior into financial journeys | UI consumers receive stable shapes, bounded failures, request IDs, and explicit caching |
 
 ## 11. Known gaps and risks
 
@@ -406,9 +460,9 @@ The imported repository indicates that the project began as a Streamlit decision
 ### Engineering gaps
 
 - Financial logic exists in both Python and TypeScript, creating parity risk.
-- Browser and end-to-end testing are not established.
+- Browser and end-to-end testing are not established; current web coverage focuses on server adapters and API contracts.
 - Web calculation utilities need dedicated unit tests.
-- External data adapters need clearer caching, freshness, and failure handling.
+- External data adapters still need source-health monitoring, rate limiting, and provider fallback.
 - Some imported source strings display encoding artefacts and need cleanup.
 - Authentication, persistence, telemetry, monitoring, and deployment are not configured.
 
