@@ -307,7 +307,7 @@ Acceptance criteria:
 
 **Date:** 27 October 2026<br>
 **Implementation commit:** `d76c2de`<br>
-**Git state:** Money Mirror core milestone ready for publication to `origin/main`
+**Git state:** Money Mirror core milestone pushed to `origin/main`
 
 #### Product changes
 
