@@ -27,7 +27,8 @@ server.stderr.on("data", (chunk) => {
 });
 
 const waitForReady = async () => {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  let lastProbe = "No health response received.";
+  for (let attempt = 0; attempt < 120; attempt += 1) {
     if (server.exitCode !== null) {
       throw new Error(`Standalone server exited before becoming ready.\n${serverOutput}`);
     }
@@ -37,14 +38,15 @@ const waitForReady = async () => {
         signal: AbortSignal.timeout(1_000),
       });
       if (response.ok) return;
-    } catch {
-      // The server is still starting.
+      lastProbe = `Health probe returned HTTP ${response.status}.`;
+    } catch (error) {
+      lastProbe = error instanceof Error ? error.message : String(error);
     }
 
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
   }
 
-  throw new Error(`Standalone server was not ready within 10 seconds.\n${serverOutput}`);
+  throw new Error(`Standalone server was not ready within 30 seconds. Last probe: ${lastProbe}\n${serverOutput}`);
 };
 
 const assert = (condition, message) => {

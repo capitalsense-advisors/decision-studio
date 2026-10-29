@@ -149,3 +149,111 @@ main:has(.smallcase-page){width:100%;max-width:none;padding:0}.smallcase-page{mi
 @media(max-width:900px){.smallcase-hero{grid-template-columns:1fr;min-height:620px}.smallcase-compass{display:none}.smallcase-intro,.strategy-opening,.allocation-story,.chapter-narrative{grid-template-columns:1fr}.strategy-opening{gap:2rem}.allocation-orbit{width:min(260px,68vw)}.chapter-narrative blockquote{grid-column:auto}.smallcase-reality>div{grid-template-columns:1fr}}
 @media(max-width:620px){.smallcase-hero{min-height:560px;padding:5.5rem 1rem 4.5rem}.smallcase-hero h1{font-size:clamp(3.5rem,17vw,5.2rem)}.smallcase-studio{width:min(100% - 1.2rem,1180px);padding-top:4.5rem}.smallcase-tabs{top:52px;margin-inline:-.1rem;grid-template-columns:repeat(3,minmax(125px,1fr));overflow:auto}.smallcase-tabs button{min-height:54px;padding:.6rem;font-size:.67rem}.smallcase-tabs button span{display:none}.strategy-opening{padding:4rem 0}.strategy-question h2{font-size:clamp(3rem,14vw,4.3rem)}.strategy-snapshot{grid-template-columns:1fr}.allocation-story{padding:1.4rem;border-radius:25px}.allocation-list>div{grid-template-columns:10px minmax(95px,.9fr) minmax(60px,1fr) 44px;gap:.45rem}.strategy-chapters{gap:4.5rem}.chapter-narrative{padding:1.5rem 0}.chapter-narrative h2{font-size:clamp(2.4rem,12vw,3.6rem)}.smallcase-reality{padding:1.4rem;border-radius:25px}.smallcase-reality>h2{font-size:clamp(2.7rem,13vw,4rem)}}
 @media(prefers-reduced-motion:reduce){.smallcase-panel{animation:none}.smallcase-tabs button{transition:none}}
+
+/* Product-wide journey refinement: fewer destinations, clearer hand-offs. */
+.decision-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.decision-card{min-height:520px}
+.decision-card.research{background:#6b465f}
+.decision-card.research .card-glyph i:nth-child(2){border-radius:38% 62% 58% 42%;transform:rotate(28deg)}
+.nav-shell{box-shadow:0 12px 35px color-mix(in srgb,var(--ink) 5%,transparent)}
+.primary-nav a[aria-current="page"]{box-shadow:0 7px 18px color-mix(in srgb,var(--ink) 16%,transparent)}
+
+/* Smallcase Stories: decision-first rather than a catalogue of holdings. */
+.smallcase-page{--strategy-tone:#8ea1ff}
+.smallcase-hero-copy>p{margin-bottom:0}
+.smallcase-hero-action{display:inline-flex;align-items:center;gap:1rem;margin-top:2rem;padding:.75rem .8rem .75rem 1.1rem;border:1px solid rgba(248,242,231,.22);border-radius:999px;color:#f8f2e7;font-size:.75rem;font-weight:800;letter-spacing:.04em;transition:background .3s ease,border-color .3s ease,transform .3s ease}
+.smallcase-hero-action i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#aab7ff;color:#0b2531;font-style:normal;font-size:1rem}
+.smallcase-hero-action:hover{transform:translateY(-2px);border-color:#aab7ff;background:rgba(142,161,255,.08)}
+.smallcase-studio{scroll-margin-top:60px}
+.smallcase-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem;padding:.5rem;border-radius:24px}
+.smallcase-tabs button{position:relative;justify-content:flex-start;min-height:76px;padding:.75rem 1rem;text-align:left;border:1px solid transparent;border-radius:18px}
+.smallcase-tabs button:hover{border-color:var(--line);background:color-mix(in srgb,var(--raised) 55%,transparent)}
+.smallcase-tabs button.active{background:var(--text);border-color:var(--text)}
+.smallcase-tab-index{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border:1px solid color-mix(in srgb,var(--muted) 35%,transparent);border-radius:50%;font:400 .66rem Baskerville,Georgia,serif;color:var(--gold)}
+.smallcase-tab-copy{display:grid;gap:.18rem;min-width:0}
+.smallcase-tab-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
+.smallcase-tab-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:.6rem;font-weight:600}
+.smallcase-tabs button.active .smallcase-tab-copy small{color:color-mix(in srgb,var(--bg) 58%,transparent)}
+.smallcase-tabs button>i{margin-left:auto;color:var(--muted);font-style:normal;opacity:0;transform:translate(-4px,4px);transition:.25s ease}
+.smallcase-tabs button.active>i{color:var(--strategy-tone);opacity:1;transform:none}
+.strategy-question>span{color:var(--strategy-tone)}
+.strategy-opening aside{position:sticky;top:150px;overflow:hidden}
+.strategy-opening aside:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--strategy-tone)}
+.strategy-opening aside>a{background:var(--text);color:var(--bg)}
+.strategy-opening aside>a span{color:var(--strategy-tone)}
+.strategy-fit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;margin-top:-2.5rem;border:1px solid var(--line);border-radius:22px;background:var(--line);box-shadow:var(--shadow)}
+.strategy-fit>div{min-height:128px;padding:1.2rem;background:var(--surface)}
+.strategy-fit span,.strategy-fit strong{display:block}
+.strategy-fit span{margin-bottom:.75rem;color:var(--muted);font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.strategy-fit strong{max-width:280px;font:400 clamp(1.15rem,1.8vw,1.5rem)/1.2 Baskerville,Georgia,serif}
+.strategy-fit>div:first-child{box-shadow:inset 0 3px 0 var(--strategy-tone)}
+.allocation-story{position:relative;overflow:hidden}
+.allocation-story:after{content:"";position:absolute;width:340px;height:340px;right:-170px;bottom:-220px;border:1px solid color-mix(in srgb,var(--strategy-tone) 35%,transparent);border-radius:50%;box-shadow:0 0 0 54px color-mix(in srgb,var(--strategy-tone) 3%,transparent)}
+.allocation-orbit{transition:background .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+.allocation-orbit:hover{transform:rotate(3deg) scale(1.02)}
+.strategy-chapter>header{color:var(--strategy-tone)}
+.smallcase-holdings-table tbody tr{transition:background .2s ease}
+.smallcase-holdings-table tbody tr:hover{background:color-mix(in srgb,var(--strategy-tone) 7%,var(--surface))}
+
+@media(max-width:980px){.decision-cards{grid-template-columns:1fr}.decision-card{min-height:500px}.strategy-opening aside{position:relative;top:auto}.strategy-fit{margin-top:-1rem}}
+@media(max-width:620px){
+  .smallcase-hero{min-height:calc(100svh - 128px);padding-top:4.5rem}
+  .smallcase-hero h1{font-size:clamp(3.3rem,16vw,4.8rem)}
+  .smallcase-hero-copy>p{font-size:.94rem;line-height:1.65}
+  .smallcase-hero-action{margin-top:1.4rem}
+  .smallcase-tabs{top:57px;grid-template-columns:repeat(3,minmax(158px,1fr));margin-inline:-.1rem;padding:.35rem;overflow-x:auto;scroll-snap-type:x mandatory}
+  .smallcase-tabs{scrollbar-width:none}.smallcase-tabs::-webkit-scrollbar{display:none}
+  .smallcase-tabs button{min-height:68px;padding:.65rem .75rem;scroll-snap-align:center}
+  .smallcase-tab-index{display:grid;width:29px;height:29px}
+  .smallcase-tabs button .smallcase-tab-copy{display:grid}.smallcase-tab-copy strong{font-size:.72rem}.smallcase-tab-copy small{font-size:.56rem}
+  .strategy-opening{padding:3.4rem 0 2rem}
+  .strategy-fit{grid-template-columns:1fr;margin-top:0;border-radius:18px}
+  .strategy-fit>div{min-height:auto;padding:1rem 1.1rem}
+  .strategy-fit span{margin-bottom:.45rem}.strategy-fit strong{font-size:1.18rem}
+  .strategy-snapshot{margin-top:1rem}
+  .allocation-story{margin-top:3rem}
+  .smallcase-table-scroll{overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}
+  .smallcase-holdings-table{display:block;min-width:0}.smallcase-holdings-table thead{display:none}.smallcase-holdings-table tbody{display:grid;gap:.7rem}.smallcase-holdings-table tr{display:grid;grid-template-columns:1fr auto;gap:.7rem 1rem;padding:1rem;border:1px solid var(--line);border-radius:17px;background:var(--surface);box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 7%,transparent)}
+  .smallcase-holdings-table td,.smallcase-holdings-table td:first-child{display:block;min-width:0;padding:0;border:0;text-align:left;font-size:.72rem}
+  .smallcase-holdings-table td:first-child{grid-column:1/-1;padding-bottom:.65rem;border-bottom:1px solid var(--line)}
+  .smallcase-holdings-table td:not(:first-child):before{content:attr(data-label);display:block;margin-bottom:.2rem;color:var(--muted);font-size:.54rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .smallcase-holdings-table td:nth-child(2){grid-column:1/-1}
+  .smallcase-holdings-table .number{text-align:left}
+}
+
+/* Basket identity belongs to Paisaan's blue–coral system; gold is reserved for the wider atelier. */
+.smallcase-hero:after{border-color:rgba(142,161,255,.34);box-shadow:inset 0 0 0 75px rgba(142,161,255,.025),inset 0 0 0 76px rgba(142,161,255,.2)}
+.smallcase-hero .eyebrow,.smallcase-hero h1 em,.smallcase-compass strong{color:#aab7ff}
+.smallcase-compass{border-color:rgba(142,161,255,.45)}
+.smallcase-tabs button span,.smallcase-tab-index,.strategy-chapter>header strong,.allocation-orbit strong{color:var(--strategy-tone)}
+.deep-dive-link{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:.8rem;padding:1rem 1.1rem;border:1px solid color-mix(in srgb,var(--bg) 14%,transparent);border-radius:16px;background:color-mix(in srgb,var(--bg) 5%,transparent)}
+.deep-dive-link>span{color:color-mix(in srgb,var(--bg) 52%,transparent);font-size:.7rem}.deep-dive-link>strong{font-size:.78rem}.deep-dive-link i{margin-left:.5rem;color:var(--gold);font-style:normal}
+@media(max-width:620px){.deep-dive-link{align-items:flex-start;flex-direction:column}}
+
+/* 0.4.5 visual foundation: modern fintech typography and a sharper Paisaan palette. */
+:root{--bg:#f6f7fc;--surface:#ffffff;--raised:#edf0f8;--text:#11172a;--muted:#657089;--line:#dfe3ee;--accent:#5968ed;--accent-soft:#e7e9ff;--teal:#15917f;--positive:#198763;--negative:#d84f5f;--gold:#7d89f7;--coral:#f06466;--ink:#11172a;--shadow:0 24px 70px rgba(28,38,70,.1)}
+:root[data-theme="dark"]{--bg:#090d18;--surface:#111829;--raised:#182138;--text:#f4f6ff;--muted:#a5aec2;--line:#28334a;--accent:#9ca7ff;--accent-soft:#242d59;--teal:#58c4ad;--positive:#67c59c;--negative:#ff8791;--gold:#9ca7ff;--coral:#ff7a75;--ink:#080c17;--shadow:0 28px 80px rgba(0,0,0,.34)}
+body{font-family:var(--font-body),"Segoe UI Variable",system-ui,sans-serif;letter-spacing:-.008em}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3,h4,.page-heading h1,.hero h1,.hero-panel strong,.section-heading h2,.journey-card h3,.atelier-copy h1,.choice-section h2,.story-heading h2,.closing-section h2,.card-copy h3,.story-card h3,.manifesto p,.future-hero h1,.future-result h2,.mirror-hero h1,.mirror-result>h2,.mirror-reality h3,.smallcase-hero h1,.smallcase-intro h2,.allocation-copy h2,.smallcase-reality>h2,.strategy-question h2,.chapter-narrative h2,.chapter-narrative blockquote{font-family:var(--font-display),"Segoe UI Variable Display",system-ui,sans-serif!important;font-style:normal!important;font-weight:620!important;letter-spacing:-.055em}
+h1 em,h2 em,h3 em{font-style:normal!important;font-weight:650!important;background:linear-gradient(105deg,var(--accent),color-mix(in srgb,var(--coral) 78%,var(--accent)));background-clip:text;-webkit-background-clip:text;color:transparent!important}
+.stage-card-main>strong,.stage-card-back,.stage-caption span,.card-index,.story-number,.mini-result strong,.manifesto-seal span,.future-score strong,.future-metric strong,.path-card strong,.projection-head strong,.mirror-orbit span,.entry-cards button>i,.holding-card>header span,.mirror-progress i,.mirror-metrics strong,.weight-list>div>span i,.assistant-toggle span,.allocation-orbit strong,.strategy-chapter>header strong,.smallcase-tab-index,.strategy-fit strong{font-family:var(--font-display),"Segoe UI Variable Display",system-ui,sans-serif!important;font-style:normal!important}
+.brand-type strong{font-family:var(--font-display),"Segoe UI Variable Display",system-ui,sans-serif}
+.eyebrow{color:var(--accent);letter-spacing:.12em}
+.decision-card.future{background:linear-gradient(145deg,#4b58d6,#28346e)}
+.decision-card.mirror{background:linear-gradient(145deg,#e65f68,#843a4c)}
+.decision-card.match{background:linear-gradient(145deg,#168f7c,#0e4f52)}
+.decision-card.research{background:linear-gradient(145deg,#7656c8,#3b315f)}
+.button-luminous{background:linear-gradient(110deg,var(--accent),#7c5cf5);box-shadow:0 16px 38px color-mix(in srgb,var(--accent) 28%,transparent)}
+.atelier-hero,.mirror-hero{background:radial-gradient(circle at 82% 25%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 28%),var(--bg)}
+.smallcase-hero{background:#0c1930}.smallcase-hero h1 em{background:linear-gradient(105deg,#9ca7ff,#ff8a86);background-clip:text;-webkit-background-clip:text;color:transparent!important}
+.smallcase-hero .eyebrow,.smallcase-compass strong{color:#aeb7ff}
+.smallcase-compass{border-color:rgba(156,167,255,.45)}
+.smallcase-reality{background:linear-gradient(135deg,#e95f6d,#9b405a)}
+.allocation-copy .eyebrow{color:var(--strategy-tone)}
+.manifesto-seal{border-color:var(--accent);box-shadow:inset 0 0 0 7px var(--text),inset 0 0 0 8px color-mix(in srgb,var(--accent) 50%,transparent)}
+.manifesto-seal:before,.manifesto-seal:after,.manifesto-seal span{color:var(--accent)}
+
+/* Two-font contract. Manrope carries interface copy; Nunito Sans carries display moments. */
+body *{font-family:var(--font-body),"Segoe UI Variable",system-ui,sans-serif!important}
+body h1,body h2,body h3,body h4,body .brand-type strong,body .stage-card-main>strong,body .stage-card-back,body .stage-caption span,body .card-index,body .story-number,body .mini-result strong,body .manifesto-seal span,body .future-score strong,body .future-metric strong,body .path-card strong,body .projection-head strong,body .mirror-orbit span,body .entry-cards button>i,body .mirror-metrics strong,body .allocation-orbit strong,body .strategy-chapter>header strong,body .smallcase-tab-index,body .strategy-fit strong{font-family:var(--font-display),"Segoe UI Variable Display",system-ui,sans-serif!important}

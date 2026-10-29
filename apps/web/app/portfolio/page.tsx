@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 
 import { ResultNotes } from "@/components/ui";
@@ -143,7 +144,7 @@ export default function PortfolioPage() {
         <div className="future-section-title"><span>01</span><div><p>A safe beginning</p><h2 id="entry-title">How would you like to start?</h2></div></div>
         <div className="entry-cards">
           <button type="button" onClick={() => fileRef.current?.click()}><span>Fastest</span><i>↥</i><strong>Import a CSV</strong><small>Symbol, quantity and average cost. You review everything before analysis.</small></button>
-          <button type="button" onClick={beginManual}><span>Most control</span><i>＋</i><strong>Add them gently</strong><small>One compact holding card at a time—no spreadsheet wall.</small></button>
+          <button type="button" onClick={beginManual}><span>Most control</span><i>＋</i><strong>Add them one by one</strong><small>Use one compact holding card at a time. No spreadsheet wall.</small></button>
           <button type="button" onClick={loadSample}><span>Explore first</span><i>◎</i><strong>Try a sample</strong><small>See the complete journey using four Indian stocks.</small></button>
         </div>
         <input ref={fileRef} hidden type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && void importCsv(event.target.files[0])} />
@@ -192,7 +193,7 @@ function MirrorResult({ analysis, failures }: { analysis: NonNullable<ReturnType
     <div className="weight-list" aria-label="Holding allocation">{analysis.weighted.map((row, index) => <div key={row.id}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{row.symbol}</b><small>{money(row.value, true)}</small></span><strong>{percent(row.weight)}</strong><em><i style={{ width: `${row.weight * 100}%` }} /></em></div>)}</div>
     <section className="asset-mix"><span>Asset mix</span><div>{analysis.assetMix.map((item) => <article key={item.assetType}><i style={{ "--mix": `${item.weight * 100}%` } as React.CSSProperties} /><b>{item.assetType === "fund" ? "Fund / ETF" : item.assetType[0].toUpperCase() + item.assetType.slice(1)}</b><strong>{percent(item.weight)}</strong></article>)}</div></section>
     <section className="mirror-reality"><span>Reality Check</span><h3>{analysis.effectiveHoldings < analysis.weighted.length * .6 ? `You own ${analysis.weighted.length} lines, but concentration behaves more like ${analysis.effectiveHoldings.toFixed(1)} equal holdings.` : "The number of lines and the spread of risk are reasonably aligned."}</h3><p>This says nothing about whether a company is good or bad. It only shows how strongly one outcome can move the whole portfolio.</p></section>
-    <section className="mirror-moves"><span>Your Move</span><div><article><i>01</i><b>Review the top weight</b><p>Decide the maximum share one company should have before the market decides it for you.</p></article><article><i>02</i><b>Direct new money thoughtfully</b><p>New contributions can change weights without forcing an immediate sale or tax event.</p></article><article><i>03</i><b>Check the missing layer</b><p>Add funds, debt, gold and cash to see the whole household allocation—not only stocks.</p></article></div></section>
+    <section className="mirror-moves"><span>Your Move</span><div><article><i>01</i><b>Review the top weight</b><p>Decide the maximum share one company should have before the market decides it for you.</p></article><article><i>02</i><b>Direct new money thoughtfully</b><p>New contributions can change weights without forcing an immediate sale or tax event.</p></article><article><i>03</i><b>Check the missing layer</b><p>Add funds, debt, gold and cash to see the full household allocation, not only stocks.</p></article></div><Link className="deep-dive-link" href="/risk"><span>Need the advanced layer?</span><strong>Open volatility and downside analysis <i aria-hidden="true">→</i></strong></Link></section>
     {failures.length > 0 && <p className="mirror-warning">Not included because no fresh price was available: {failures.join(", ")}.</p>}
     <ResultNotes assumptions={["Values use quantity × the displayed current price.", "Concentration uses the Herfindahl index and position weights.", "Only holdings with a usable current price are included."]} warnings={["This is allocation analysis, not a judgement of security quality or a recommendation to trade."]} />
   </div>;
@@ -202,7 +203,7 @@ function MirrorAssistant({ open, topic, stage, issues, failures, onOpen, onTopic
   const copy: Record<AssistantTopic, { title: string; body: string }> = {
     start: { title: "Let’s build a clean mirror", body: "Start with a CSV if you already have one. Manual entry is calmer for fewer than five holdings. You will always review before analysis." },
     csv: { title: "A small, boring CSV is perfect", body: "Use headers: symbol, quantity, average_cost, and optionally asset_type. Exported broker files often need only those three columns renamed." },
-    symbols: { title: issues ? `${issues} data ${issues === 1 ? "detail needs" : "details need"} attention` : "Use exchange symbols, not company names", body: "For India enter RELIANCE or TCS—Paisaan adds the NSE suffix safely. Duplicate symbols should be merged so weights stay honest." },
+    symbols: { title: issues ? `${issues} data ${issues === 1 ? "detail needs" : "details need"} attention` : "Use exchange symbols, not company names", body: "For India, enter RELIANCE or TCS. Paisaan adds the NSE suffix safely. Merge duplicate symbols so weights stay honest." },
     prices: { title: failures.length ? "Some prices need your help" : "Prices are a checkpoint", body: failures.length ? `Yahoo could not return ${failures.join(", ")}. Enter a recent price manually or remove the row; the rest remain usable.` : "Check Yahoo prices after quantities and costs are clean. If the source is unavailable, your draft stays untouched and you can retry." },
     read: { title: stage === "mirror" ? "Read weight before return" : "You’re ready for the mirror", body: stage === "mirror" ? "The first question is not ‘am I up?’ but ‘what single outcome matters too much?’ Effective holdings translates unequal weights into a more honest count." : "Reveal the mirror when every row has a valid symbol, positive quantity, non-negative cost and usable price." },
   };

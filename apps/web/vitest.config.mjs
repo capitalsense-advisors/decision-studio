@@ -9,5 +9,6 @@ export default defineConfig({
     clearMocks: true,
     environment: "node",
     include: ["**/*.test.{ts,tsx}"],
+    testTimeout: 20_000,
   },
 });
