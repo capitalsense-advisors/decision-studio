@@ -54,14 +54,16 @@ const assert = (condition, message) => {
 try {
   await waitForReady();
 
-  const [healthResponse, pageResponse, manifestResponse, robotsResponse] = await Promise.all([
+  const [healthResponse, pageResponse, smallcasesResponse, manifestResponse, robotsResponse] = await Promise.all([
     fetch(`${origin}/api/health`),
     fetch(origin),
+    fetch(`${origin}/smallcases`),
     fetch(`${origin}/manifest.webmanifest`),
     fetch(`${origin}/robots.txt`),
   ]);
-  const [health, manifest, robots] = await Promise.all([
+  const [health, smallcasesPage, manifest, robots] = await Promise.all([
     healthResponse.json(),
+    smallcasesResponse.text(),
     manifestResponse.json(),
     robotsResponse.text(),
   ]);
@@ -70,6 +72,8 @@ try {
   assert(health.status === "ok", "Health endpoint did not report an ok status.");
   assert(health.release === release, "Health endpoint did not expose the runtime release.");
   assert(pageResponse.ok, "Home page did not return a successful status.");
+  assert(smallcasesResponse.ok, "Smallcases page did not return a successful status.");
+  assert(smallcasesPage.includes("Three ways to read"), "Smallcases page did not include its strategy studio.");
   assert(manifest.name === "Paisaan by CapitalSense", "Web manifest name is incorrect.");
   assert(robots.includes("Disallow: /api/"), "Robots policy does not protect API routes.");
   assert(pageResponse.headers.has("content-security-policy"), "CSP header is missing.");
