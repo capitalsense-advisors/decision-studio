@@ -25,10 +25,10 @@ npm run dev
 Quality checks:
 
 ```bash
-npm run lint
-npm run typecheck
-npm run build
+npm run release:check
 ```
+
+Production deployment requirements, automated gates, runtime contracts, and unresolved launch decisions are tracked in [Production readiness](./docs/PRODUCTION_READINESS.md).
 
 ### Streamlit app
 
