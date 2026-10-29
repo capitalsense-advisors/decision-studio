@@ -3,20 +3,21 @@
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
 > **Last updated:** 29 October 2026<br>
-> **Current tracked version:** `0.4.4-dev`<br>
-> **Current phase:** Production release foundation and hosted-environment selection<br>
+> **Current tracked version:** `0.4.5-dev`<br>
+> **Current phase:** Basket strategy studio, cohesive product journey, and hosted-environment selection<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `3cafddb` on `main`
+> **Latest implementation milestone:** `dc6b567` on `main`
 
 ## 1. End goal
 
 Build **Paisaan by CapitalSense** into a trustworthy, mobile-first financial decision product for young Indian investors.
 
-Paisaan should help a user answer three questions:
+Paisaan should help a user answer four questions:
 
 1. **Future Me:** Can I afford the future I am planning?
 2. **Money Mirror:** What is actually happening in my portfolio?
 3. **Fund Match:** Does this mutual fund fit my goal, risk, and existing investments?
+4. **Baskets:** What thesis, concentration, and risk am I accepting before I open a research-led basket?
 
 The app should turn financial complexity into:
 
@@ -89,12 +90,13 @@ Paisaan is educational decision support. It does **not**:
 
 | Experience | Current route | Purpose | Included capabilities | Delivery status |
 |---|---|---|---|---|
-| Home | `/` | Orient the user around three decisions | Brand story, product paths, trust framing | New design implemented in `0.2.0-dev` |
+| Home | `/` | Orient the user around four decisions | Brand story, product paths, trust framing | Four-path journey implemented in `0.4.5-dev` |
 | Future Me | `/tools` | Turn a goal into a feasible plan | Goal templates, live sliders, scenario testing, Reality Check, and Your Move | MVP implemented in `0.3.0-dev` |
 | Money Mirror | `/portfolio` | Explain portfolio health | Guided import, validated holdings, Yahoo/manual pricing, asset and position concentration, Mirror Guide | Core journey implemented; downside and sector layers remain |
 | Fund Match | `/mutual-funds` | Evaluate suitability and compare funds | Fund search, NAV history, returns, volatility, drawdown | Single-fund analysis exists; fit and comparison not built |
-| Deep Dive | `/risk` | Reveal advanced portfolio risk when requested | Parametric, historical and Monte Carlo VaR | Engine and interface exist; not integrated into Money Mirror |
-| How we math | `/guide` | Explain methods, data, assumptions, privacy, and limitations | Existing workflow guide | Exists; needs Paisaan rewrite |
+| Baskets | `/smallcases` | Compare research-led portfolio narratives before opening the live Smallcase | Three strategy tabs, allocation architecture, chapter-led holdings, supplied Alpha's snapshot, risk framing, and official links | Basket studio implemented in `0.4.5-dev` |
+| Deep Dive | `/risk` | Reveal advanced portfolio risk when requested | Parametric, historical and Monte Carlo VaR | Linked contextually from Money Mirror; removed from primary navigation |
+| Learn | `/guide` | Explain the shared decision rhythm, data, assumptions, privacy, and limitations | Four workspace guides and trust principles | Rewritten for the cohesive journey in `0.4.5-dev` |
 
 ### Supporting interaction language
 
@@ -110,7 +112,7 @@ Paisaan is educational decision support. It does **not**:
 
 ## 5. Tool consolidation decisions
 
-The web app must not become a menu of unrelated calculators. Existing tools should be absorbed into the three outcome-led experiences.
+The web app must not become a menu of unrelated calculators. Existing tools should be absorbed into the four outcome-led experiences.
 
 | Existing capability | Product destination | Decision |
 |---|---|---|
@@ -136,9 +138,10 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 
 - **Brand:** Paisaan by CapitalSense
 - **Visual concept:** a digital financial atelier
-- **Historical influence:** French Renaissance proportion, editorial typography, medallions, fine rules, and restrained ornament
-- **Interaction influence:** modern product restraint, layered depth, progressive disclosure, responsive motion, and outcome-first storytelling
-- **Palette:** parchment, deep ink, ultramarine, warm coral, antique gold, and teal
+- **Visual influence:** modern consumer fintech with rounded geometry, strong hierarchy, fine rules, and restrained ornament
+- **Type system:** Nunito Sans for display moments and Manrope for navigation, controls, tables, labels, and body copy; no third decorative face
+- **Interaction influence:** layered depth, progressive disclosure, responsive motion, and outcome-first storytelling
+- **Palette:** soft cloud, deep ink, electric periwinkle, warm coral, and mint
 - **Motion:** scroll reveals, sticky narrative cards, gentle depth, and spring-like easing
 - **Accessibility:** keyboard semantics, visible focus behavior, responsive layout, and reduced-motion support
 
@@ -168,7 +171,7 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Persistence | Browser session only | Account-optional saved decisions | Not started |
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
-| Automated tests | 29-test legacy baseline plus 31 current web calculation, journey, API, adapter, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
+| Automated tests | 29-test legacy baseline plus 35 current web calculation, journey, API, adapter, formatting, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
 | Deployment | CI-gated standalone build and non-root container contract | GitHub-backed preview and production environments | Partial; hosting not selected |
 
 ## 8. Delivery roadmap
@@ -302,6 +305,40 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.5-dev` — Basket strategy studio and cohesive product journey
+
+**Date:** 29 October 2026<br>
+**Strategy implementation commit:** `72c8cd4`<br>
+**Journey and visual-system refinement commit:** `dc6b567`<br>
+**Git state:** Both implementation milestones committed; this release-ledger update records them
+
+#### Product and experience changes
+
+- Added `/smallcases` as the native **Baskets** experience and primary navigation destination, consolidating the supplied microsite concepts into the existing Next.js product rather than shipping a second runtime.
+- Preserved the strongest imported ideas: chapter-led portfolio storytelling, visible allocation, complete holdings, sober risk framing, and links to the official Smallcase pages.
+- Added three accessible strategy tabs: India Emergent Industries, India Execution Engine, and Alpha's of the Pack.
+- Added the complete 30-stock Alpha's allocation supplied by the product owner, including snapshot prices, shares, weights, the ₹5,07,540.89 basket amount, and the -7.84% two-month snapshot return.
+- Grouped every portfolio into understandable investment chapters so users can see where conviction lives before reading individual securities.
+- Labelled supplied values as a dated snapshot rather than live market data, and added prominent methodology, risk, freshness, and suitability limitations.
+- Added a responsive interface aligned with Paisaan's product language, including the strategy compass, allocation orbit, narrative chapters, and mobile holding cards.
+- Expanded the home journey from three to four clear decisions, with Basket Stories framed as the research path for understanding a ready-made portfolio thesis.
+- Reduced primary navigation noise by moving Deep Dive behind Money Mirror and renaming the methodology destination to Learn.
+- Rebranded all customer-facing Smallcase strategy language as Baskets while retaining “Open on smallcase” for the official external destination.
+- Replaced the serif-heavy editorial treatment with a strict two-font contract: rounded Nunito Sans for display and Manrope for interface copy.
+- Replaced the parchment and gold emphasis with a cohesive cloud, ink, periwinkle, coral, and mint palette.
+- Removed em dashes from customer-facing web copy and rewrote templated lines in direct, plain language.
+- Standardised displayed metrics and portfolio weights to one decimal place while preserving full calculation precision.
+
+#### Engineering and verification
+
+- Added typed strategy data and invariants that verify each portfolio and its themes allocate to 100%.
+- Added component coverage for switching to Alpha's, its key snapshot values, holdings, and official `https://smlc.se/WFt3j` link.
+- Extended the standalone production smoke check to verify the new route and its strategy-studio content.
+- Preserved the stricter production Content Security Policy while allowing the evaluation mode required by the Next.js development runtime only outside production.
+- ESLint, strict TypeScript, all 35 Vitest tests, the 15-route production build, and the standalone production smoke check passed.
+- `npm audit --omit=dev` reported zero vulnerabilities.
+- Desktop and 390 px mobile visual checks passed without page-level horizontal overflow; the interaction path is covered by the component test suite.
 
 ### `0.4.4-dev` — Production release foundation
 
