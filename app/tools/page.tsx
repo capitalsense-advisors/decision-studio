@@ -70,7 +70,7 @@ export default function FutureMePage() {
   const read = conservativeOnTrack
     ? `Your current rhythm reaches ${goal.name.toLowerCase()} even in the lower-return check.`
     : baseOnTrack
-      ? `The base case reaches this goal, but a 2% lower return leaves a gap. This plan is close—not cushioned.`
+      ? `The base case reaches this goal, but a 2% lower return leaves a gap. This plan is close, but it has little room for error.`
       : `You are building momentum, but the current plan reaches about ${percentReady}% of this goal.`;
 
   return (
@@ -79,7 +79,7 @@ export default function FutureMePage() {
         <div>
           <span className="eyebrow">Future Me · one living plan</span>
           <h1>Make tomorrow feel <em>touchable.</em></h1>
-          <p>Choose the life moment. Move what feels possible. Paisaan does the maths quietly and gives you a decision—not another form to complete.</p>
+          <p>Choose the life moment and set what feels possible. Paisaan handles the maths and gives you a decision instead of another long form.</p>
         </div>
         <div className="future-hero-proof" aria-hidden="true"><span>One plan</span><strong>3 paths</strong><small>Expected · safer · more time</small></div>
       </header>
@@ -155,7 +155,7 @@ export default function FutureMePage() {
         <article className="reality-card">
           <span>Reality Check</span>
           <h2>{emergencyReady === null ? "Start with the foundation." : emergencyReady ? "Your foundation is in place." : "Protect the plan before stretching it."}</h2>
-          <p>{emergencyReady === null ? "Tell us whether you have three to six months of essential expenses set aside. That answer changes which next move is responsible." : emergencyReady ? `At a 2% lower return, this plan could reach ${money(result.conservativeCorpus, true)}. Keep that range—not one forecast—in mind.` : "Build three to six months of essential expenses before increasing a long-term contribution. Resilience is part of the return."}</p>
+          <p>{emergencyReady === null ? "Tell us whether you have three to six months of essential expenses set aside. That answer changes which next move is responsible." : emergencyReady ? `At a 2% lower return, this plan could reach ${money(result.conservativeCorpus, true)}. Plan around the range, not one forecast.` : "Build three to six months of essential expenses before increasing a long-term contribution. Resilience is part of the return."}</p>
         </article>
         <article className="moves-card">
           <span>Your Move</span><h2>Three honest ways forward.</h2>

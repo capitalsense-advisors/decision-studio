@@ -91,7 +91,7 @@ export const smallcaseStrategies: SmallcaseStrategy[] = [
         label: "Solar manufacturing",
         weight: 19,
         title: "India is not only installing solar. It is building the supply chain.",
-        narrative: "The next phase is increasingly about domestic cells, modules and deeper vertical integration—not only adding generation capacity.",
+        narrative: "The next phase is increasingly about domestic cells, modules and deeper vertical integration, not only adding generation capacity.",
         takeaway: "The next solar opportunity may sit in the factory behind the solar farm.",
         holdings: [
           holding("Emmvee Photovoltaic Power", "EMMVEE", 11, "Integrated solar manufacturing"),
@@ -219,7 +219,7 @@ export const smallcaseStrategies: SmallcaseStrategy[] = [
         weight: 40.7,
         title: "Back the challengers trying to redraw everyday categories.",
         narrative: "Consumer electronics, defence technology, healthcare, electric mobility, digital payments, food delivery, jewellery, eyewear and commerce platforms make this the portfolio’s fastest-moving sleeve. The upside is category creation; the price is higher volatility and a wider range of outcomes.",
-        takeaway: "The pack is strongest when adoption becomes durable economics—not only attention.",
+        takeaway: "The pack is strongest when adoption becomes durable economics, not only attention.",
         holdings: [
           holding("Amber Enterprises India Ltd", "AMBER", 2.9, "Electronics manufacturing", 6234, 2),
           holding("Zen Technologies Ltd", "ZENTEC", 3.9, "Defence training and anti-drone systems", 1621, 12),

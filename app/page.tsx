@@ -29,11 +29,20 @@ const paths = [
   {
     number: "III",
     name: "Fund Match",
-    prompt: "Does this fund fit me—or just look good?",
+    prompt: "Does this fund fit me, or does it only look good?",
     copy: "Compare fit, cost and consistency before a recent return becomes an expensive decision.",
     href: "/mutual-funds",
     action: "Find your fit",
     className: "match",
+  },
+  {
+    number: "IV",
+    name: "Basket Stories",
+    prompt: "What am I really buying into?",
+    copy: "See the thesis, concentration and trade-offs inside a research-led basket before opening it on Smallcase.",
+    href: "/smallcases",
+    action: "Read the portfolios",
+    className: "research",
   },
 ];
 
@@ -48,7 +57,7 @@ export default function HomePage() {
         <div className="atelier-copy">
           <span className="eyebrow">A new language for your money</span>
           <h1 id="hero-title">Know your money.<br /><em>Make your move.</em></h1>
-          <p className="hero-lede">Good financial decisions should not feel like homework. Paisaan turns the complicated parts into one clear thought, one honest trade-off and one useful next step.</p>
+          <p className="hero-lede">Money decisions get hard when every app adds another metric. Paisaan shows what matters, why it matters, and what you can do next.</p>
           <div className="hero-actions">
             <Link className="button button-luminous" href="#choose">Find my starting point <span aria-hidden="true">↘</span></Link>
             <Link className="text-link" href="/guide">See how we think <span aria-hidden="true">→</span></Link>
@@ -69,14 +78,14 @@ export default function HomePage() {
       </section>
 
       <section className="promise-strip reveal" aria-label="Product principles">
-        <span>No jargon</span><i>✦</i><span>No judgement</span><i>✦</i><span>No finance-bro chaos</span>
+        <span>Plain language</span><i>✦</i><span>Clear assumptions</span><i>✦</i><span>No sales pressure</span>
       </section>
 
       <section className="choice-section" id="choose">
         <div className="section-intro reveal">
-          <span className="eyebrow">Your three ateliers</span>
+          <span className="eyebrow">Four decisions · one calm system</span>
           <h2>Start with the question<br /><em>already on your mind.</em></h2>
-          <p>No hunting through a cabinet of calculators. Choose the decision; we bring in the right maths quietly.</p>
+          <p>Choose the question that brought you here. Each workspace follows the same rhythm: a clear read, visible evidence, an honest risk check and a useful next move.</p>
         </div>
         <div className="decision-cards">
           {paths.map((path, index) => (
@@ -101,9 +110,9 @@ export default function HomePage() {
 
       <section className="story-section">
         <div className="story-heading reveal">
-          <span className="eyebrow">Clarity, choreographed</span>
-          <h2>The intelligence stays underneath. <em>You see only what helps.</em></h2>
-          <p>Paisaan reveals detail in the same order a good adviser would: the answer first, the trade-off second, the maths when you ask for it.</p>
+          <span className="eyebrow">A clear order of thinking</span>
+          <h2>Get the answer first. <em>Check the maths when you need it.</em></h2>
+          <p>Each workspace follows the same order: conclusion, trade-off, evidence, and next step. You can open the detailed maths whenever you want to verify the result.</p>
         </div>
         <div className="story-stack">
           <article className="story-card reveal">
@@ -118,7 +127,7 @@ export default function HomePage() {
           </article>
           <article className="story-card reveal">
             <div className="story-number">03</div>
-            <div><span>YOUR MOVE</span><h3>Leave with a next step.</h3><p>Every journey ends with two or three concrete choices—not another dashboard to decipher.</p></div>
+            <div><span>YOUR MOVE</span><h3>Leave with a next step.</h3><p>Every journey ends with two or three concrete choices. You do not need another dashboard to decode.</p></div>
             <div className="mini-actions"><span>Raise my SIP <b>↗</b></span><span>Give it 18 months <b>→</b></span></div>
           </article>
         </div>
@@ -133,8 +142,8 @@ export default function HomePage() {
       <section className="closing-section reveal">
         <span className="eyebrow">Your money, in focus</span>
         <h2>Less noise.<br /><em>More knowing.</em></h2>
-        <p>Begin with the future you want to make possible.</p>
-        <Link className="button button-luminous" href="/tools">Meet Future Me <span aria-hidden="true">→</span></Link>
+        <p>Choose the question that matters today. Paisaan will keep the rest out of your way.</p>
+        <Link className="button button-luminous" href="#choose">Choose my starting point <span aria-hidden="true">↑</span></Link>
       </section>
     </div>
   );
