@@ -6,7 +6,7 @@
 > **Current tracked version:** `0.4.4-dev`<br>
 > **Current phase:** Production release foundation and hosted-environment selection<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `c177867` on `main`
+> **Latest implementation milestone:** `3cafddb` on `main`
 
 ## 1. End goal
 
@@ -307,6 +307,7 @@ Acceptance criteria:
 
 **Date:** 29 October 2026<br>
 **Implementation commit:** `c177867`<br>
+**CI hardening commit:** `3cafddb`<br>
 **Git state:** Production-foundation milestone and release ledger pushed to `origin/main`
 
 #### Release engineering changes
@@ -316,6 +317,8 @@ Acceptance criteria:
 - Added a multi-stage Node.js 22 container that runs the generated Next.js standalone server as a non-root user and probes `/api/health`.
 - Added a runtime release identifier to `/api/health`, with `DEPLOYMENT_VERSION` documented as an immutable commit or image identifier.
 - Added a repeatable production smoke harness that boots the generated server and verifies health, release identity, the home route, install metadata, robots policy, and security headers.
+- Corrected the health-route contract test to honour the injected deployment identifier in clean CI environments, after the first remote run exposed the hard-coded local fallback.
+- Upgraded the official checkout and Node setup actions to v7 after GitHub flagged the older action runtime as deprecated.
 
 #### Web and security changes
 
@@ -331,6 +334,7 @@ Acceptance criteria:
 - The Next.js production build passed for 14 routes, including the new manifest and robots routes.
 - The generated standalone server passed the automated production smoke test.
 - `npm audit --omit=dev --audit-level=high` reported zero vulnerabilities.
+- GitHub Actions production-gate run `40891397111` passed from a clean checkout on Node.js 22, including `npm ci`, the full release gate, and the production dependency audit.
 - Docker image execution remains unverified locally because Docker is not installed on this workstation; GitHub CI and the standalone runtime are verified, while hosted deployment remains an explicit blocker.
 
 ### `0.4.3-dev` — Future Me outcome canvas
