@@ -14,7 +14,7 @@ describe("API routes", () => {
   it("returns a no-store health response", async () => {
     const response = await health();
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ status: "ok", service: "paisaan-web" });
+    await expect(response.json()).resolves.toEqual({ status: "ok", service: "paisaan-web", release: "development" });
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("x-request-id")).toBeTruthy();
   });
