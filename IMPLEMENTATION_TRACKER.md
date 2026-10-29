@@ -2,11 +2,11 @@
 
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
-> **Last updated:** 28 October 2026<br>
-> **Current tracked version:** `0.4.3-dev`<br>
-> **Current phase:** Future Me outcome-first visual planning experience<br>
+> **Last updated:** 29 October 2026<br>
+> **Current tracked version:** `0.4.4-dev`<br>
+> **Current phase:** Production release foundation and hosted-environment selection<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
-> **Latest implementation milestone:** `4fb9d38` on `main`
+> **Latest implementation milestone:** `c177867` on `main`
 
 ## 1. End goal
 
@@ -169,7 +169,7 @@ The web app must not become a menu of unrelated calculators. Existing tools shou
 | Authentication | None | Deferred until saved cross-device decisions are required | Not started |
 | AI explanation | Python service only | Optional explanation grounded in deterministic results | Legacy only |
 | Automated tests | 29-test legacy baseline plus 31 current web calculation, journey, API, adapter, and data tests | Domain, component, integration, end-to-end, and accessibility tests | Partial |
-| Deployment | Local application | GitHub-backed hosted environments | Not configured |
+| Deployment | CI-gated standalone build and non-root container contract | GitHub-backed preview and production environments | Partial; hosting not selected |
 
 ## 8. Delivery roadmap
 
@@ -302,6 +302,36 @@ Acceptance criteria:
 - [ ] Product, compliance, privacy, accessibility, and reliability reviews are complete.
 
 ## 9. Version history and code changes
+
+### `0.4.4-dev` — Production release foundation
+
+**Date:** 29 October 2026<br>
+**Implementation commit:** `c177867`<br>
+**Git state:** Production-foundation milestone and release ledger pushed to `origin/main`
+
+#### Release engineering changes
+
+- Added one `release:check` command for ESLint, strict TypeScript, all web tests, the optimized build, and a standalone-runtime smoke test.
+- Added GitHub Actions gates for pull requests and every push to `main`, using Node.js 22, a clean `npm ci`, the release gate, and a high-severity production dependency audit.
+- Added a multi-stage Node.js 22 container that runs the generated Next.js standalone server as a non-root user and probes `/api/health`.
+- Added a runtime release identifier to `/api/health`, with `DEPLOYMENT_VERSION` documented as an immutable commit or image identifier.
+- Added a repeatable production smoke harness that boots the generated server and verifies health, release identity, the home route, install metadata, robots policy, and security headers.
+
+#### Web and security changes
+
+- Added the install manifest and robots policy as native Next.js metadata routes.
+- Added a baseline Content Security Policy, HSTS in production, cross-origin opener/resource policies, permissions policy, clickjacking protection, and framework-header suppression.
+- Enabled standalone output and deployment IDs so immutable releases can be identified consistently at build and runtime boundaries.
+- Documented the production runtime contract, release procedure, and launch blockers that require hosting, vendor, operational, accessibility, privacy, compliance, or legal ownership.
+
+#### Verification
+
+- ESLint and strict TypeScript passed.
+- Vitest passed all 31 tests across ten files.
+- The Next.js production build passed for 14 routes, including the new manifest and robots routes.
+- The generated standalone server passed the automated production smoke test.
+- `npm audit --omit=dev --audit-level=high` reported zero vulnerabilities.
+- Docker image execution remains unverified locally because Docker is not installed on this workstation; GitHub CI and the standalone runtime are verified, while hosted deployment remains an explicit blocker.
 
 ### `0.4.3-dev` — Future Me outcome canvas
 
@@ -623,6 +653,7 @@ The imported repository indicates that the project began as a Streamlit decision
 | 27 Oct 2026 | Make Future Me one planning journey instead of a tool catalogue | Young users need a clear decision path, not a choice between finance calculators | Non-core valuation, tax, trade, multiplier, and allocation tools are removed from the primary route |
 | 27 Oct 2026 | Keep the Money Mirror assistant deterministic and contextual | An assistant should reduce data-entry confusion without becoming an unaudited financial engine | Guidance can explain CSVs, symbols, failures, and results but cannot alter calculations or invent prices |
 | 28 Oct 2026 | Treat external audits as evidence to verify, not implementation instructions | Audit snapshots can be stale and redesign recommendations can exceed verified defects | Reproduce claims against current code; implement confirmed correctness and trust issues only |
+| 29 Oct 2026 | Separate deployable engineering from public-launch approval | A green build cannot resolve hosting, monitoring, data rights, accessibility, privacy, or regulatory ownership | Automate the engineering gate and track unresolved launch blockers explicitly |
 
 ## 11. Known gaps and risks
 
@@ -641,7 +672,7 @@ The imported repository indicates that the project began as a Streamlit decision
 - The legacy Python virtual environment points to a removed Python 3.11 installation and must be recreated before its 29-test baseline can be rerun locally.
 - External data adapters still need source-health monitoring, rate limiting, and provider fallback.
 - Some imported source strings display encoding artefacts and need cleanup.
-- Authentication, persistence, telemetry, monitoring, and deployment are not configured.
+- Authentication, persistence, telemetry, external monitoring, and hosted deployment are not configured; the standalone build, container contract, health probe, and CI gates are now implemented.
 
 ### Trust and compliance gaps
 
