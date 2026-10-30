@@ -267,3 +267,85 @@ export function trailingReturns(points: Array<{ date: string; value: number }>) 
     return [label, annualized ? Math.pow(simple, 365 / ((latestTime - Date.parse(past.date)) / 86400000)) - 1 : simple - 1];
   }));
 }
+
+export function rollingReturnSummary(points: Array<{ date: string; value: number }>, windowDays = 365) {
+  const sorted = [...points]
+    .filter((point) => Number.isFinite(point.value) && point.value > 0 && Number.isFinite(Date.parse(point.date)))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (sorted.length < 2) return null;
+
+  const returns: number[] = [];
+  let startIndex = 0;
+  for (let endIndex = 0; endIndex < sorted.length; endIndex += 1) {
+    const endTime = Date.parse(sorted[endIndex].date);
+    const targetTime = endTime - windowDays * 86_400_000;
+    while (startIndex + 1 < endIndex && Date.parse(sorted[startIndex + 1].date) <= targetTime) startIndex += 1;
+    const startTime = Date.parse(sorted[startIndex].date);
+    const elapsedDays = (endTime - startTime) / 86_400_000;
+    if (elapsedDays < windowDays * .96 || elapsedDays > windowDays * 1.08) continue;
+    const annualized = Math.pow(sorted[endIndex].value / sorted[startIndex].value, 365 / elapsedDays) - 1;
+    if (Number.isFinite(annualized)) returns.push(annualized);
+  }
+  if (!returns.length) return null;
+
+  const ordered = [...returns].sort((a, b) => a - b);
+  const middle = Math.floor(ordered.length / 2);
+  const median = ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2;
+  return {
+    observations: returns.length,
+    median,
+    worst: ordered[0],
+    positiveShare: returns.filter((value) => value > 0).length / returns.length,
+  };
+}
+
+export function benchmarkComparison(
+  fundPoints: Array<{ date: string; value: number }>,
+  benchmarkPoints: Array<{ date: string; value: number }>,
+  riskFreeRate = .065,
+) {
+  const fundMap = new Map(fundPoints.map((point) => [point.date, point.value]));
+  const aligned = benchmarkPoints
+    .flatMap((point) => {
+      const fundValue = fundMap.get(point.date);
+      return fundValue && fundValue > 0 && point.value > 0 ? [{ date: point.date, fund: fundValue, benchmark: point.value }] : [];
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (aligned.length < 30) return null;
+
+  const start = aligned[0];
+  const end = aligned[aligned.length - 1];
+  const elapsedDays = (Date.parse(end.date) - Date.parse(start.date)) / 86_400_000;
+  if (elapsedDays < 30) return null;
+  const fundAnnualReturn = Math.pow(end.fund / start.fund, 365 / elapsedDays) - 1;
+  const benchmarkAnnualReturn = Math.pow(end.benchmark / start.benchmark, 365 / elapsedDays) - 1;
+  const pairs = aligned.slice(1).map((point, index) => ({
+    fund: point.fund / aligned[index].fund - 1,
+    benchmark: point.benchmark / aligned[index].benchmark - 1,
+  })).filter((pair) => Number.isFinite(pair.fund) && Number.isFinite(pair.benchmark));
+  if (pairs.length < 29) return null;
+
+  const fundMean = pairs.reduce((sum, pair) => sum + pair.fund, 0) / pairs.length;
+  const benchmarkMean = pairs.reduce((sum, pair) => sum + pair.benchmark, 0) / pairs.length;
+  const benchmarkVariance = pairs.reduce((sum, pair) => sum + Math.pow(pair.benchmark - benchmarkMean, 2), 0) / Math.max(1, pairs.length - 1);
+  const covariance = pairs.reduce((sum, pair) => sum + (pair.fund - fundMean) * (pair.benchmark - benchmarkMean), 0) / Math.max(1, pairs.length - 1);
+  const beta = benchmarkVariance > 0 ? covariance / benchmarkVariance : null;
+  const activeReturns = pairs.map((pair) => pair.fund - pair.benchmark);
+  const activeMean = activeReturns.reduce((sum, value) => sum + value, 0) / activeReturns.length;
+  const trackingError = Math.sqrt(activeReturns.reduce((sum, value) => sum + Math.pow(value - activeMean, 2), 0) / Math.max(1, activeReturns.length - 1)) * Math.sqrt(252);
+  const activeAnnualReturn = fundAnnualReturn - benchmarkAnnualReturn;
+  const alpha = beta === null ? null : fundAnnualReturn - (riskFreeRate + beta * (benchmarkAnnualReturn - riskFreeRate));
+
+  return {
+    startDate: start.date,
+    endDate: end.date,
+    observations: aligned.length,
+    fundAnnualReturn,
+    benchmarkAnnualReturn,
+    activeAnnualReturn,
+    beta,
+    alpha,
+    trackingError,
+    informationRatio: trackingError > 0 ? activeAnnualReturn / trackingError : null,
+  };
+}

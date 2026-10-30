@@ -9,6 +9,7 @@ const items = [
   ["/tools", "Plan"],
   ["/portfolio", "Portfolio"],
   ["/mutual-funds", "Funds"],
+  ["/ipos", "IPOs"],
   ["/smallcases", "Baskets"],
   ["/guide", "Learn"],
 ] as const;

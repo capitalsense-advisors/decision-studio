@@ -187,9 +187,17 @@ export default function PortfolioPage() {
 
 function MirrorResult({ analysis, failures }: { analysis: NonNullable<ReturnType<typeof analyzePortfolio>>; failures: string[] }) {
   const top = analysis.weighted[0];
+  const secondThird = Math.max(0, analysis.topThreeWeight - analysis.topWeight);
+  const remainder = Math.max(0, 1 - analysis.topThreeWeight);
   const read = analysis.assessment === "Focused" ? `${top.symbol} is doing too much of the portfolio's work.` : analysis.assessment === "Watch concentration" ? `Your portfolio has variety, but its weight still gathers near the top.` : "No single holding dominates this snapshot.";
   return <div className="mirror-result" aria-live="polite">
     <header><span>The Read</span><i>{analysis.assessment}</i></header><h2>{read}</h2><p>{top.symbol} represents <b>{percent(top.weight)}</b> of the priced portfolio. The top three together represent <b>{percent(analysis.topThreeWeight)}</b>.</p>
+    <section className="concentration-map" aria-label={`Concentration map. ${top.symbol} ${percent(analysis.topWeight)}, next two holdings ${percent(secondThird)}, remaining holdings ${percent(remainder)}`}>
+      <div className="concentration-ring" style={{ "--top-weight": `${analysis.topWeight * 100}%`, "--top-three": `${analysis.topThreeWeight * 100}%` } as React.CSSProperties}>
+        <i><strong>{analysis.effectiveHoldings.toFixed(1)}</strong><span>effective holdings</span></i>
+      </div>
+      <div className="concentration-copy"><span>Risk shape</span><h3>{analysis.weighted.length} lines do not always mean {analysis.weighted.length} independent bets.</h3><div className="concentration-legend"><p><i className="top-weight-key" />{top.symbol}<strong>{percent(analysis.topWeight)}</strong></p><p><i className="next-two-key" />Next two<strong>{percent(secondThird)}</strong></p><p><i className="rest-key" />Everything else<strong>{percent(remainder)}</strong></p></div></div>
+    </section>
     <div className="mirror-metrics"><article><span>Current value</span><strong>{money(analysis.totalValue, true)}</strong></article><article><span>Unrealised return</span><strong className={analysis.gain < 0 ? "negative" : ""}>{percent(analysis.gainRate)}</strong><small>{money(analysis.gain, true)}</small></article><article><span>Effective holdings</span><strong>{analysis.effectiveHoldings.toFixed(1)}</strong><small>Concentration-adjusted</small></article></div>
     <div className="weight-list" aria-label="Holding allocation">{analysis.weighted.map((row, index) => <div key={row.id}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{row.symbol}</b><small>{money(row.value, true)}</small></span><strong>{percent(row.weight)}</strong><em><i style={{ width: `${row.weight * 100}%` }} /></em></div>)}</div>
     <section className="asset-mix"><span>Asset mix</span><div>{analysis.assetMix.map((item) => <article key={item.assetType}><i style={{ "--mix": `${item.weight * 100}%` } as React.CSSProperties} /><b>{item.assetType === "fund" ? "Fund / ETF" : item.assetType[0].toUpperCase() + item.assetType.slice(1)}</b><strong>{percent(item.weight)}</strong></article>)}</div></section>
