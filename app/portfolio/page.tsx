@@ -134,7 +134,7 @@ export default function PortfolioPage() {
     <div className="mirror-page">
       <header className="mirror-hero">
         <div><span className="eyebrow">Money Mirror · private portfolio check</span><h1>See the shape of<br /><em>what you own.</em></h1><p>Bring holdings, verify prices, then reveal the one portfolio pattern worth noticing first. Your draft stays in this browser tab.</p></div>
-        <div className="mirror-orbit" aria-hidden="true"><i /><i /><span>MM</span></div>
+        <div className="mirror-hero-media" aria-hidden="true"><Image src="/media/cards/money-mirror-hero.png" alt="" width={420} height={420} sizes="(max-width: 900px) 240px, 330px" priority /></div>
       </header>
 
       <nav className="mirror-progress" aria-label="Money Mirror progress">
