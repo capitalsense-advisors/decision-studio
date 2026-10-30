@@ -6,9 +6,9 @@ import { useEffect, useRef } from "react";
 
 const items = [
   ["/", "Home"],
-  ["/tools", "Future Me"],
-  ["/portfolio", "Money Mirror"],
-  ["/mutual-funds", "Fund Match"],
+  ["/tools", "Plan"],
+  ["/portfolio", "Portfolio"],
+  ["/mutual-funds", "Funds"],
   ["/smallcases", "Baskets"],
   ["/guide", "Learn"],
 ] as const;

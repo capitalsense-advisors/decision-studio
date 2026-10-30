@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 
@@ -143,9 +144,9 @@ export default function PortfolioPage() {
       {stage === "choose" && <section className="mirror-entry" aria-labelledby="entry-title">
         <div className="future-section-title"><span>01</span><div><p>A safe beginning</p><h2 id="entry-title">How would you like to start?</h2></div></div>
         <div className="entry-cards">
-          <button type="button" onClick={() => fileRef.current?.click()}><span>Fastest</span><i>↥</i><strong>Import a CSV</strong><small>Symbol, quantity and average cost. You review everything before analysis.</small></button>
-          <button type="button" onClick={beginManual}><span>Most control</span><i>＋</i><strong>Add them one by one</strong><small>Use one compact holding card at a time. No spreadsheet wall.</small></button>
-          <button type="button" onClick={loadSample}><span>Explore first</span><i>◎</i><strong>Try a sample</strong><small>See the complete journey using four Indian stocks.</small></button>
+          <button type="button" onClick={() => fileRef.current?.click()}><span>Fastest</span><Image src="/media/cards/portfolio-import.png" alt="" width={240} height={240} sizes="(max-width: 900px) 160px, 180px" aria-hidden="true" /><strong>Import a CSV</strong><small>Symbol, quantity and average cost. You review everything before analysis.</small></button>
+          <button type="button" onClick={beginManual}><span>Most control</span><Image src="/media/cards/portfolio-manual.png" alt="" width={240} height={240} sizes="(max-width: 900px) 160px, 180px" aria-hidden="true" /><strong>Add them one by one</strong><small>Use one compact holding card at a time. No spreadsheet wall.</small></button>
+          <button type="button" onClick={loadSample}><span>Explore first</span><Image src="/media/cards/portfolio-sample.png" alt="" width={240} height={240} sizes="(max-width: 900px) 160px, 180px" aria-hidden="true" /><strong>Try a sample</strong><small>See the complete journey using four Indian stocks.</small></button>
         </div>
         <input ref={fileRef} hidden type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && void importCsv(event.target.files[0])} />
         <p className="privacy-note"><b>Private by design.</b> CSV contents are parsed in your browser and are not uploaded. Only ticker symbols are sent to the price endpoint.</p>
