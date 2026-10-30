@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useId, useMemo, useState } from "react";
 
 import { ResultNotes } from "@/components/ui";
@@ -17,13 +18,14 @@ type Goal = {
   targetMax: number;
   years: number;
   inflationAdjusted: boolean;
+  media: string;
 };
 
 const GOALS: Goal[] = [
-  { id: "crore", numeral: "01", name: "My first crore", line: "Build a seven-figure milestone", target: 10_000_000, targetMax: 30_000_000, years: 15, inflationAdjusted: true },
-  { id: "home", numeral: "02", name: "A place of my own", line: "Prepare the future down payment", target: 3_000_000, targetMax: 15_000_000, years: 7, inflationAdjusted: true },
-  { id: "freedom", numeral: "03", name: "Financial freedom", line: "Create room to choose your time", target: 18_000_000, targetMax: 60_000_000, years: 20, inflationAdjusted: true },
-  { id: "custom", numeral: "04", name: "Something personal", line: "Shape a goal that is only yours", target: 5_000_000, targetMax: 50_000_000, years: 10, inflationAdjusted: true },
+  { id: "crore", numeral: "01", name: "My first crore", line: "Build a seven-figure milestone", target: 10_000_000, targetMax: 30_000_000, years: 15, inflationAdjusted: true, media: "/media/cards/goal-first-crore.png" },
+  { id: "home", numeral: "02", name: "A place of my own", line: "Prepare the future down payment", target: 3_000_000, targetMax: 15_000_000, years: 7, inflationAdjusted: true, media: "/media/cards/goal-home.png" },
+  { id: "freedom", numeral: "03", name: "Financial freedom", line: "Create room to choose your time", target: 18_000_000, targetMax: 60_000_000, years: 20, inflationAdjusted: true, media: "/media/cards/goal-freedom.png" },
+  { id: "custom", numeral: "04", name: "Something personal", line: "Shape a goal that is only yours", target: 5_000_000, targetMax: 50_000_000, years: 10, inflationAdjusted: true, media: "/media/cards/goal-personal.png" },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -95,7 +97,7 @@ export default function FutureMePage() {
               aria-pressed={goalId === item.id}
               onClick={() => onGoal(item)}
             >
-              <span>{item.numeral}</span><i aria-hidden="true" />
+              <span>{item.numeral}</span><Image className="goal-card-media" src={item.media} alt="" width={220} height={220} sizes="(max-width: 620px) 38vw, 150px" aria-hidden="true" />
               <strong>{item.name}</strong><small>{item.line}</small>
             </button>
           ))}

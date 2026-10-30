@@ -29,11 +29,11 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand" aria-label="Paisaan home"><BrandLogo /></Link>
-        <p className="product-label"><i /> Private by default</p>
+        <ThemeControl />
       </header>
       <div className="nav-shell"><PrimaryNav /></div>
       <main id="main-content">{children}</main>
-      <footer><span><b>Paisaan</b> helps you think clearly. It does not execute trades or replace professional advice.</span><ThemeControl /></footer>
+      <footer><span><b>Paisaan</b> helps you think clearly. It does not execute trades or replace professional advice.</span></footer>
     </div>
   </body></html>;
 }

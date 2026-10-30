@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .streamlit/secrets.toml
+secrets/
 
 # Python
 .venv/
@@ -32,4 +33,3 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
-
