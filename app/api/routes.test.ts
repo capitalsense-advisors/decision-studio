@@ -2,7 +2,9 @@ import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GET as getFund } from "@/app/api/funds/[code]/route";
+import { GET as getFundCatalog } from "@/app/api/funds/catalog/route";
 import { GET as searchFunds } from "@/app/api/funds/search/route";
+import { GET as suggestFunds } from "@/app/api/funds/suggest/route";
 import { GET as health } from "@/app/api/health/route";
 import { GET as getMarketHistory } from "@/app/api/market/history/route";
 
@@ -45,6 +47,23 @@ describe("API routes", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual([{ schemeCode: 101, schemeName: "Alpha Direct Growth" }]);
     expect(response.headers.get("cache-control")).toContain("s-maxage=86400");
+  });
+
+  it("returns a supplied-catalog peer set for a matched fund", async () => {
+    const response = await getFundCatalog(new NextRequest("http://localhost/api/funds/catalog?name=Parag%20Parikh%20Flexi%20Cap%20Fund%20Direct%20Plan%20Growth"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.selected.category).toBe("Flexi Cap Fund");
+    expect(body.peers.length).toBeGreaterThan(5);
+  });
+
+  it("returns typo-tolerant fund recommendations", async () => {
+    const response = await suggestFunds(new NextRequest("http://localhost/api/funds/suggest?q=parg%20parik%20flex%20cap"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body[0].name).toContain("Parag Parikh Flexi Cap Fund");
   });
 
   it("rejects an invalid scheme code", async () => {

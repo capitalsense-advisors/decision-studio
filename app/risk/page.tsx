@@ -116,6 +116,7 @@ export default function RiskPage() {
         <Metric label="Annualised volatility" value={percent(analysis.risk.annualVolatility)}/>
         <Metric label="Maximum drawdown" value={percent(analysis.risk.maxDrawdown)}/>
       </div>
+      <RiskLossLadder analysis={analysis} />
       <ResultNotes assumptions={[
         `Equal-weight daily returns use ${analysis.usedSymbols.join(", ")}.`,
         "Yahoo closing prices are used; they are not represented as dividend-adjusted total returns.",
@@ -124,4 +125,26 @@ export default function RiskPage() {
       ]} warnings={["VaR can underestimate losses during regime changes and crises. Use multiple risk measures.", "Historical results do not predict future returns."]}/>
     </section>}
   </div>;
+}
+
+function RiskLossLadder({ analysis }: { analysis: Analysis }) {
+  const rows = [
+    { label: `${analysis.method} VaR`, detail: `${Math.round(analysis.confidence * 100)}% confidence, ${analysis.horizon} day${analysis.horizon === 1 ? "" : "s"}`, loss: Math.max(0, analysis.selectedVar) },
+    { label: analysis.method === "Parametric" ? "Historical tail loss" : "Expected shortfall", detail: "Average loss beyond the VaR threshold", loss: Math.max(0, analysis.selectedCvar) },
+    { label: "Worst historical drawdown", detail: "Largest peak-to-trough decline in this history", loss: Math.max(0, Math.abs(analysis.risk.maxDrawdown)) },
+  ];
+  return <figure className="risk-ladder" aria-labelledby="risk-ladder-title">
+    <figcaption><div><span>Loss ladder</span><h3 id="risk-ladder-title">How much of the portfolio remains?</h3></div><p>Every bar starts with your full portfolio. The coloured section is the modelled or historical loss.</p></figcaption>
+    <div>
+      {rows.map((row) => {
+        const boundedLoss = Math.min(1, row.loss);
+        return <article key={row.label}>
+          <header><div><strong>{row.label}</strong><small>{row.detail}</small></div><b>{money(row.loss * analysis.portfolioValue, true)}</b></header>
+          <div className="risk-capital-bar" role="img" aria-label={`${row.label}: ${percent(row.loss)} loss and ${percent(1 - boundedLoss)} remaining`}><i style={{ width: `${boundedLoss * 100}%` }} /><span style={{ width: `${(1 - boundedLoss) * 100}%` }} /></div>
+          <footer><span>Loss {percent(row.loss)}</span><strong>Remaining {money((1 - boundedLoss) * analysis.portfolioValue, true)}</strong></footer>
+        </article>;
+      })}
+    </div>
+    <div className="risk-ladder-legend"><span><i />Estimated loss</span><span><i />Capital remaining</span></div>
+  </figure>;
 }

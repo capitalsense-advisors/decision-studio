@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 
-import { money, percent } from "@/lib/format";
+import { money } from "@/lib/format";
 import { smallcaseStrategies, strategyHoldings } from "@/lib/smallcases";
 
 const palette = ["#8ea1ff", "#e78068", "#6f9d91", "#a78bd4", "#6f88ad"];
@@ -39,10 +40,9 @@ export default function SmallcasesPage() {
         <p>One looks for emerging industrial capability. One follows execution. One backs a wider pack of category challengers. Start with the investment question, not the recent return.</p>
         <a className="smallcase-hero-action" href="#strategy-studio"><span>Explore the portfolios</span><i aria-hidden="true">↓</i></a>
       </div>
-      <div className="smallcase-compass" aria-label="Three strategy lenses">
-        <span>DISCOVER</span><span>DELIVER</span><span>CHALLENGE</span>
-        <i aria-hidden="true" />
-        <strong>03</strong><small>distinct lenses</small>
+      <div className="smallcase-lenses" aria-label="Three distinct strategy lenses">
+        <Image src="/media/cards/three-strategy-lenses.png" alt="Three overlapping glass lenses representing discovery, delivery, and challenge" width={1024} height={1024} priority sizes="(max-width: 900px) 62vw, 330px" />
+        <span>Discover</span><span>Deliver</span><span>Challenge</span>
       </div>
     </header>
 
@@ -82,13 +82,6 @@ export default function SmallcasesPage() {
           <div><span>Watch closely</span><strong>{signal.watchFor}</strong></div>
           <div><span>Portfolio role</span><strong>{signal.role}</strong></div>
         </section>
-
-        {strategy.snapshot && <section className="strategy-snapshot" aria-label="Supplied Smallcase snapshot">
-          <div><span>Basket amount</span><strong>{money(strategy.snapshot.basketAmount)}</strong><small>Amount shown in the supplied snapshot</small></div>
-          <div><span>{strategy.snapshot.periodLabel}</span><strong className={strategy.snapshot.periodReturn < 0 ? "negative" : "positive"}>{percent(strategy.snapshot.periodReturn / 100)}</strong><small>Recent return · not a forecast</small></div>
-          <div><span>Weighting scheme</span><strong>{strategy.snapshot.weighting}</strong><small>Allocation by portfolio weights</small></div>
-          <p>{strategy.snapshot.suppliedAt}. Prices, shares and returns can change; verify the live Smallcase before investing.</p>
-        </section>}
 
         <section className="allocation-story" aria-labelledby="allocation-title">
           <div className="allocation-visual">

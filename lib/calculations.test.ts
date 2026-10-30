@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { equalWeightReturns, futurePlan, portfolioRisk } from "@/lib/calculations";
+import { benchmarkComparison, equalWeightReturns, futurePlan, portfolioRisk, rollingReturnSummary } from "@/lib/calculations";
 
 const base = {
   targetToday: 120_000,
@@ -64,5 +64,37 @@ describe("portfolio risk inputs", () => {
     const result = portfolioRisk([0.1, -0.1], 0.95, 1);
 
     expect(result?.annualReturn).toBeCloseTo(Math.pow(0.99, 126) - 1, 10);
+  });
+});
+
+describe("rolling return summary", () => {
+  it("shows how one-year outcomes changed across starting dates", () => {
+    const points = Array.from({ length: 731 }, (_, day) => ({
+      date: new Date(Date.UTC(2024, 0, 1 + day)).toISOString().slice(0, 10),
+      value: day < 365 ? 100 + day * .1 : 136.5 - (day - 365) * .05,
+    }));
+    const result = rollingReturnSummary(points);
+
+    expect(result?.observations).toBeGreaterThan(300);
+    expect(result?.median).not.toBeNull();
+    expect(result?.worst).toBeLessThan(result?.median ?? 0);
+    expect(result?.positiveShare).toBeGreaterThanOrEqual(0);
+    expect(result?.positiveShare).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("benchmark comparison", () => {
+  it("calculates active return from aligned dates", () => {
+    const fund = Array.from({ length: 366 }, (_, day) => ({
+      date: new Date(Date.UTC(2025, 0, 1 + day)).toISOString().slice(0, 10), value: 100 * Math.pow(1.12, day / 365),
+    }));
+    const benchmark = Array.from({ length: 366 }, (_, day) => ({
+      date: new Date(Date.UTC(2025, 0, 1 + day)).toISOString().slice(0, 10), value: 100 * Math.pow(1.08, day / 365),
+    }));
+    const result = benchmarkComparison(fund, benchmark);
+
+    expect(result?.fundAnnualReturn).toBeCloseTo(.12, 3);
+    expect(result?.benchmarkAnnualReturn).toBeCloseTo(.08, 3);
+    expect(result?.activeAnnualReturn).toBeCloseTo(.04, 3);
   });
 });
