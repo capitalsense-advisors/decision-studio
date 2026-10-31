@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { IpoSnapshot, IpoSnapshotItem } from "@/lib/ipo-snapshot";
 import styles from "./page.module.css";
 
 type IpoInputs = {
@@ -26,24 +27,24 @@ type IpoInputs = {
 };
 
 const initialInputs: IpoInputs = {
-  price: 100,
-  lotSize: 150,
-  freshIssueShare: 60,
-  ipoPe: 28,
-  peerPe: 25,
-  roe: 16,
-  debtEquity: .6,
-  patMargin: 11,
-  qib: 8,
-  retail: 5,
-  snii: 6,
-  bnii: 4,
-  total: 7,
-  gmp: 8,
+  price: 0,
+  lotSize: 0,
+  freshIssueShare: 0,
+  ipoPe: 0,
+  peerPe: 0,
+  roe: 0,
+  debtEquity: 0,
+  patMargin: 0,
+  qib: 0,
+  retail: 0,
+  snii: 0,
+  bnii: 0,
+  total: 0,
+  gmp: 0,
   capital: 500000,
   applicants: 2,
-  debtUse: 40,
-  growthUse: 35,
+  debtUse: 0,
+  growthUse: 0,
   riskCount: 0,
 };
 
@@ -56,7 +57,9 @@ export function evaluateIpo(input: IpoInputs) {
   const quality = Math.round(clamp(roeScore * .4 + marginScore * .3 + debtScore * .3 - input.riskCount * 4));
 
   const peRatio = input.peerPe > 0 ? input.ipoPe / input.peerPe : null;
-  const valuation = peRatio === null ? 50 : peRatio <= .8 ? 92 : peRatio <= 1 ? 78 : peRatio <= 1.2 ? 58 : peRatio <= 1.5 ? 36 : 16;
+  const valuation = peRatio !== null
+    ? peRatio <= .8 ? 92 : peRatio <= 1 ? 78 : peRatio <= 1.2 ? 58 : peRatio <= 1.5 ? 36 : 16
+    : input.ipoPe > 0 ? input.ipoPe <= 15 ? 80 : input.ipoPe <= 25 ? 65 : input.ipoPe <= 40 ? 45 : 25 : 50;
 
   const demandBase = (
     clamp(Math.log1p(input.qib) / Math.log(51) * 100) * .42
@@ -77,12 +80,12 @@ export function evaluateIpo(input: IpoInputs) {
   const nextMove = valuation < 45
     ? "Compare the offer P/E with true listed peers before applying."
     : quality < 55
-      ? "Read the RHP risk factors and check whether profits convert into cash."
+      ? "The stored prospectus snapshot flags weak business quality. Check cash conversion before deciding."
       : input.riskCount >= 3
-        ? "Read each flagged RHP risk and test how one failure could affect revenue, margins, or cash flow."
+        ? "The stored prospectus snapshot has several risk flags. Test their effect on revenue, margins, and cash flow."
       : input.freshIssueShare < 35
         ? "Check why most proceeds are going to selling shareholders."
-        : "Verify use of proceeds, peer valuation, and promoter dilution in the RHP.";
+        : "Compare the captured use of proceeds, valuation, and dilution before deciding.";
 
   return { quality, valuation, demand, longTerm, lotCost, peRatio, retailAllotmentProxy, verdict, nextMove };
 }
@@ -139,16 +142,64 @@ function Field({ label, value, min, max, step = 1, suffix = "", onChange }: {
 
 export default function IpoPage() {
   const [inputs, setInputs] = useState(initialInputs);
+  const [snapshot, setSnapshot] = useState<IpoSnapshot | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState("");
+  const [snapshotError, setSnapshotError] = useState("");
+  const selectedIpo = useMemo(() => snapshot?.items.find((item) => item.slug === selectedSlug) ?? null, [snapshot, selectedSlug]);
   const result = useMemo(() => evaluateIpo(inputs), [inputs]);
   const allocation = useMemo(() => optimiseMainboardApplications(inputs), [inputs]);
   const update = (key: keyof IpoInputs, value: number) => setInputs((current) => ({ ...current, [key]: value }));
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/ipos/snapshot", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("IPO snapshot is unavailable");
+        return response.json() as Promise<IpoSnapshot>;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        setSnapshot(next);
+        const firstUseful = next.items.find((item) => item.status === "open" && item.priceHigh && item.lotSize)
+          ?? next.items.find((item) => item.priceHigh && item.lotSize);
+        if (firstUseful) setSelectedSlug(firstUseful.slug);
+      })
+      .catch(() => { if (!cancelled) setSnapshotError("The last saved IPO snapshot could not be loaded."); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedIpo) return;
+    setInputs((current) => ({
+      ...current,
+      price: selectedIpo.priceHigh ?? 0,
+      lotSize: selectedIpo.lotSize ?? 0,
+      freshIssueShare: selectedIpo.freshIssueShare ?? 0,
+      ipoPe: selectedIpo.ipoPe ?? 0,
+      peerPe: selectedIpo.peerPe ?? 0,
+      roe: selectedIpo.roe ?? 0,
+      debtEquity: selectedIpo.debtEquity ?? 0,
+      patMargin: selectedIpo.patMargin ?? 0,
+      qib: 0,
+      retail: 0,
+      snii: 0,
+      bnii: 0,
+      total: selectedIpo.subscription ?? 0,
+      gmp: selectedIpo.gmpPercent ?? 0,
+      riskCount: selectedIpo.risks.length,
+    }));
+  }, [selectedIpo]);
+
+  const selectIpo = (item: IpoSnapshotItem) => setSelectedSlug(item.slug);
+  const formatDate = (value: string | null) => value ? new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(new Date(`${value}T00:00:00`)) : "Date pending";
+  const snapshotTime = snapshot?.generatedAt ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.generatedAt)) : "Loading snapshot";
 
   return <div className={styles.page}>
     <header className={styles.hero}>
       <div>
         <span className={styles.kicker}>IPO Lens / Mainboard only</span>
         <h1>Separate the business from <em>the opening-day noise.</em></h1>
-        <p>Use verified RHP figures to test quality and valuation. Add subscription and GMP only as a separate demand pulse.</p>
+        <p>Pick a live mainboard issue. Paisaan brings in the offer, demand, valuation, financial snapshot, and prospectus source before showing the decision read.</p>
       </div>
       <aside>
         <span>First principle</span>
@@ -157,48 +208,51 @@ export default function IpoPage() {
       </aside>
     </header>
 
+    <section className={styles.feed} aria-labelledby="ipo-feed-title">
+      <header>
+        <div><span>Live mainboard snapshot</span><h2 id="ipo-feed-title">Choose the issue. We collect the paperwork.</h2></div>
+        <p>Saved {snapshotTime}. Visitors read this snapshot, not the provider API, so browsing never burns the daily quota.</p>
+      </header>
+      {snapshotError && <p className={styles.snapshotError}>{snapshotError}</p>}
+      <div className={styles.issuePicker}>
+        {snapshot?.items.slice(0, 8).map((item) => <button type="button" key={item.id} className={selectedSlug === item.slug ? styles.selectedIssue : ""} onClick={() => selectIpo(item)}>
+          <span><i className={styles[`status_${item.status}`]} />{item.status}</span>
+          <strong>{item.name}</strong>
+          <small>{formatDate(item.openDate)} to {formatDate(item.closeDate)}</small>
+          <footer><b>{item.priceHigh ? `₹${item.priceLow ?? item.priceHigh} to ₹${item.priceHigh}` : "Price pending"}</b><b>{item.subscription ? `${item.subscription.toFixed(2)}x` : "Demand pending"}</b></footer>
+        </button>)}
+      </div>
+      <footer className={styles.snapshotSources}>
+        <span>Stored snapshot</span>
+        {snapshot?.sources.map((source) => <a key={source.name} href={source.url} target="_blank" rel="noreferrer">{source.name} ↗</a>)}
+        <span>{snapshot?.providerRequests.ipoAlerts ?? 0} IPOAlerts {(snapshot?.providerRequests.ipoAlerts ?? 0) === 1 ? "call" : "calls"} used for this refresh</span>
+      </footer>
+    </section>
+
     <section className={styles.lab} aria-labelledby="ipo-lab-title">
       <div className={styles.controls}>
-        <header><span>01 / Verified inputs</span><h2 id="ipo-lab-title">Shape the offer</h2><p>Start with the final price band and RHP. Update demand numbers only when the timestamp is clear.</p></header>
+        <header><span>01 / Collected evidence</span><h2 id="ipo-lab-title">{selectedIpo?.name ?? "Select an IPO"}</h2><p>{selectedIpo?.about ?? "Pick a mainboard issue above to load its saved offer snapshot."}</p></header>
 
-        <div className={styles.group}>
-          <h3>Offer</h3>
-          <Field label="Upper price" value={inputs.price} min={10} max={3000} step={5} suffix=" ₹" onChange={(value) => update("price", value)} />
-          <Field label="Lot size" value={inputs.lotSize} min={1} max={2000} onChange={(value) => update("lotSize", value)} />
-          <Field label="Fresh issue share" value={inputs.freshIssueShare} min={0} max={100} suffix="%" onChange={(value) => update("freshIssueShare", value)} />
-        </div>
-
-        <div className={styles.group}>
-          <h3>Business and price</h3>
-          <Field label="IPO P/E" value={inputs.ipoPe} min={1} max={150} suffix="x" onChange={(value) => update("ipoPe", value)} />
-          <Field label="Listed peer P/E" value={inputs.peerPe} min={1} max={150} suffix="x" onChange={(value) => update("peerPe", value)} />
-          <Field label="Return on equity" value={inputs.roe} min={0} max={50} suffix="%" onChange={(value) => update("roe", value)} />
-          <Field label="Debt to equity" value={inputs.debtEquity} min={0} max={3} step={.1} suffix="x" onChange={(value) => update("debtEquity", value)} />
-          <Field label="PAT margin" value={inputs.patMargin} min={-10} max={40} suffix="%" onChange={(value) => update("patMargin", value)} />
-        </div>
+        {selectedIpo && <div className={styles.autoFacts}>
+          <div><span>Offer window</span><strong>{formatDate(selectedIpo.openDate)} to {formatDate(selectedIpo.closeDate)}</strong></div>
+          <div><span>Minimum application</span><strong>{selectedIpo.minimumAmount ? `₹${new Intl.NumberFormat("en-IN").format(selectedIpo.minimumAmount)}` : "Pending"}</strong></div>
+          <div><span>Issue size</span><strong>{selectedIpo.issueSizeCrore ? `₹${selectedIpo.issueSizeCrore} Cr` : "Pending"}</strong></div>
+          <div><span>Subscription</span><strong>{selectedIpo.subscription ? `${selectedIpo.subscription.toFixed(2)}x` : "Pending"}</strong></div>
+          <div><span>GMP context</span><strong>{selectedIpo.gmp !== null ? `₹${selectedIpo.gmp} (${selectedIpo.gmpPercent ?? 0}%)` : "Not captured"}</strong></div>
+          <div><span>Financial period</span><strong>{selectedIpo.revenueCrore ? `Revenue ₹${selectedIpo.revenueCrore} Cr` : "Pending"}</strong></div>
+        </div>}
 
         <details className={styles.demandInputs}>
-          <summary>Optional demand snapshot <span>Subscription and GMP</span></summary>
+          <summary>Fine-tune missing fields <span>Only when the stored source is incomplete</span></summary>
           <div className={styles.group}>
-            <Field label="QIB subscription" value={inputs.qib} min={0} max={100} suffix="x" onChange={(value) => update("qib", value)} />
-            <Field label="Retail subscription" value={inputs.retail} min={0} max={50} suffix="x" onChange={(value) => update("retail", value)} />
-            <Field label="Small HNI subscription" value={inputs.snii} min={0} max={100} suffix="x" onChange={(value) => update("snii", value)} />
-            <Field label="Big HNI subscription" value={inputs.bnii} min={0} max={100} suffix="x" onChange={(value) => update("bnii", value)} />
-            <Field label="Total subscription" value={inputs.total} min={0} max={100} suffix="x" onChange={(value) => update("total", value)} />
-            <Field label="GMP as offer price" value={inputs.gmp} min={-20} max={60} suffix="%" onChange={(value) => update("gmp", value)} />
+            <Field label="Listed peer P/E" value={inputs.peerPe} min={0} max={150} suffix="x" onChange={(value) => update("peerPe", value)} />
+            <Field label="Fresh issue share" value={inputs.freshIssueShare} min={0} max={100} suffix="%" onChange={(value) => update("freshIssueShare", value)} />
             <Field label="Capital available" value={inputs.capital} min={15000} max={3000000} step={5000} suffix=" ₹" onChange={(value) => update("capital", value)} />
             <Field label="Distinct eligible applicants" value={inputs.applicants} min={1} max={6} onChange={(value) => update("applicants", value)} />
           </div>
         </details>
 
-        <details className={styles.demandInputs}>
-          <summary>RHP evidence check <span>Objects of the issue and risk factors</span></summary>
-          <div className={styles.group}>
-            <Field label="Fresh issue used to repay debt" value={inputs.debtUse} min={0} max={100 - inputs.growthUse} suffix="%" onChange={(value) => update("debtUse", value)} />
-            <Field label="Fresh issue used for growth" value={inputs.growthUse} min={0} max={100 - inputs.debtUse} suffix="%" onChange={(value) => update("growthUse", value)} />
-            <Field label="Material risk flags found" value={inputs.riskCount} min={0} max={6} onChange={(value) => update("riskCount", value)} />
-          </div>
-        </details>
+        {selectedIpo?.prospectusUrl?.startsWith("https://") && <a className={styles.prospectusLink} href={selectedIpo.prospectusUrl} target="_blank" rel="noreferrer">Open captured RHP source ↗</a>}
       </div>
 
       <div className={styles.readout}>
@@ -222,17 +276,17 @@ export default function IpoPage() {
           <div><span>Retail allotment proxy</span><strong>{result.retailAllotmentProxy === null ? "Not available" : `${(result.retailAllotmentProxy * 100).toFixed(1)}%`}</strong></div>
         </div>
 
-        <div className={styles.issueSplit}>
+        {selectedIpo?.freshIssueShare !== null && <div className={styles.issueSplit}>
           <header><span>Where the offer goes</span><strong>{inputs.freshIssueShare < 35 ? "Mostly an exit for existing holders" : "Meaningful capital enters the company"}</strong></header>
           <div aria-label={`${inputs.freshIssueShare}% fresh issue and ${100 - inputs.freshIssueShare}% offer for sale`}><i style={{ width: `${inputs.freshIssueShare}%` }} /></div>
           <footer><span>Fresh issue {inputs.freshIssueShare}%</span><span>OFS {100 - inputs.freshIssueShare}%</span></footer>
-        </div>
+        </div>}
 
-        <div className={styles.objectsRead}>
+        {(inputs.debtUse > 0 || inputs.growthUse > 0) && <div className={styles.objectsRead}>
           <div><span>Debt repayment</span><strong>{inputs.debtUse}%</strong></div>
           <div><span>Growth and working capital</span><strong>{inputs.growthUse}%</strong></div>
           <div><span>Other stated uses</span><strong>{Math.max(0, 100 - inputs.debtUse - inputs.growthUse)}%</strong></div>
-        </div>
+        </div>}
 
         <section className={styles.allocator} aria-labelledby="allocator-title">
           <header><div><span>Mainboard application planner</span><h3 id="allocator-title">Use capital where competition is thinner.</h3></div><strong>{allocation ? `${(allocation.chance * 100).toFixed(1)}% proxy` : "Not available"}</strong></header>
@@ -250,7 +304,7 @@ export default function IpoPage() {
 
         <div className={styles.boundary}>
           <strong>What this does not claim</strong>
-          <p>GMP is unofficial. Subscription changes during the offer. The retail allotment figure is only a share-subscription proxy, not application-wise probability. This screen does not verify cash flow, promoter history, use of proceeds, related-party transactions, or the official RHP.</p>
+          <p>GMP is unofficial and subscription changes during the offer. The snapshot is cached to protect provider quotas and may lag the source. Use the linked exchange or prospectus source for final verification before applying.</p>
         </div>
       </div>
     </section>

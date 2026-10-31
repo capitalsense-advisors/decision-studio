@@ -7,6 +7,7 @@ import { GET as searchFunds } from "@/app/api/funds/search/route";
 import { GET as suggestFunds } from "@/app/api/funds/suggest/route";
 import { GET as health } from "@/app/api/health/route";
 import { GET as getMarketHistory } from "@/app/api/market/history/route";
+import { GET as getIpoSnapshot } from "@/app/api/ipos/snapshot/route";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -23,6 +24,19 @@ describe("API routes", () => {
     });
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("x-request-id")).toBeTruthy();
+  });
+
+  it("serves IPOs from the stored snapshot without calling a provider", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const response = await getIpoSnapshot();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.board).toBe("Mainboard");
+    expect(body.items.length).toBeGreaterThan(0);
+    expect(response.headers.get("cache-control")).toContain("stale-while-revalidate");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("rejects an undersized fund query before calling upstream", async () => {
