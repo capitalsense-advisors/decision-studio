@@ -5,6 +5,12 @@ CapitalSense Decision Studio is a financial decision-support project with two ap
 - A Next.js web app in `apps/web`
 - A Streamlit app launched from `app.py`
 
+## Live website
+
+[Open Paisaan Decision Studio](https://paisaan-decision-studio.shubhamtejani9.workers.dev)
+
+The production website is deployed on Cloudflare Workers. The URL is permanent and does not depend on a local computer or temporary tunnel.
+
 ## Product direction and implementation history
 
 The living source of truth for the product vision, user outcomes, feature consolidation, roadmap, release criteria, and version-by-version code history is the [Paisaan Implementation Tracker](./IMPLEMENTATION_TRACKER.md).
