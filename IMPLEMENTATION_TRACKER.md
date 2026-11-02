@@ -2,7 +2,7 @@
 
 > Living product, design, engineering, and release ledger for Paisaan by CapitalSense.
 >
-> **Last updated:** 29 October 2026<br>
+> **Last updated:** 3 November 2026<br>
 > **Current tracked version:** `0.4.5-dev`<br>
 > **Current phase:** Basket strategy studio, cohesive product journey, and hosted-environment selection<br>
 > **Source repository:** `https://github.com/capitalsense-advisors/decision-studio`<br>
@@ -774,3 +774,8 @@ For every product change:
 - Relevant unit, integration, and build checks pass.
 - The tracker and user-facing documentation are updated.
 - The change is reviewed, committed, and pushed to the source-of-truth repository.
+
+
+## Technical audit remediation — 3 November 2026
+
+Corrected missing-price and missing-IPO-evidence handling, fund-fit/benchmark framing, CSV/currency handling, freshness warnings and risk-tail conventions. Added bounded guide AI access and nonce CSP, vendored licensed fonts for offline-capable builds, reduced card image weight, and addressed decision-text readability and legacy return/error paths. CI now includes Python and parser checks with immutable action pins. Full finding-by-finding decisions, validation and remaining provider/deployment requirements are recorded in [Audit remediation](docs/AUDIT_REMEDIATION.md). No deployment or fresh market-data claim is implied.

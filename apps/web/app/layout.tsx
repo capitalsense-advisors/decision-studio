@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Nunito_Sans } from "next/font/google";
+import { headers } from "next/headers";
+import localFont from "next/font/local";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -8,8 +9,8 @@ import { PrimaryNav } from "@/components/primary-nav";
 import { ThemeControl } from "@/components/theme-control";
 import "./globals.css";
 
-const bodyFont = Manrope({ subsets: ["latin"], variable: "--font-body", display: "swap" });
-const displayFont = Nunito_Sans({ subsets: ["latin"], variable: "--font-display", display: "swap" });
+const bodyFont = localFont({ src: "./fonts/manrope-latin.woff2", weight: "200 800", variable: "--font-body", display: "swap" });
+const displayFont = localFont({ src: "./fonts/nunito-sans-latin.woff2", weight: "200 1000", variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Paisaan by CapitalSense", template: "%s | Paisaan" },
@@ -23,8 +24,9 @@ export const viewport: Viewport = {
 
 const themeScript = `(function(){try{var p=localStorage.getItem('decision-studio-theme')||'system';var d=p==='dark'||(p==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.style.colorScheme=d?'dark':'light'}catch(e){}})()`;
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${bodyFont.variable} ${displayFont.variable}`}>
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  return <html lang="en" suppressHydrationWarning><head><script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${bodyFont.variable} ${displayFont.variable}`}>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <div className="app-shell">
       <header className="site-header">

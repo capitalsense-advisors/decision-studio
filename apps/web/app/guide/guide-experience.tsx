@@ -21,10 +21,10 @@ const starters = [
 ];
 
 const paths = [
-  { index: "01", label: "Plan a goal", copy: "Turn a future expense into a realistic monthly contribution.", href: "/tools", media: "/media/cards/plan-life.png" },
-  { index: "02", label: "Read my portfolio", copy: "Find concentration, overlap and the risk hiding in your holdings.", href: "/portfolio", media: "/media/cards/portfolio-balance.png" },
-  { index: "03", label: "Compare funds", copy: "Look beyond recent returns to cost, consistency and fit.", href: "/mutual-funds", media: "/media/cards/fund-compare.png" },
-  { index: "04", label: "Understand baskets", copy: "See the thesis, allocation and trade-offs before going deeper.", href: "/smallcases", media: "/media/cards/investment-basket.png" },
+  { index: "01", label: "Plan a goal", copy: "Turn a future expense into a realistic monthly contribution.", href: "/tools", media: "/media/cards/plan-life.webp" },
+  { index: "02", label: "Read my portfolio", copy: "Find concentration and the risk hiding in your holdings.", href: "/portfolio", media: "/media/cards/portfolio-balance.webp" },
+  { index: "03", label: "Compare funds", copy: "Look beyond recent returns to cost, consistency and fit.", href: "/mutual-funds", media: "/media/cards/fund-compare.webp" },
+  { index: "04", label: "Understand baskets", copy: "See the thesis, allocation and trade-offs before going deeper.", href: "/smallcases", media: "/media/cards/investment-basket.webp" },
 ];
 
 const habits = [
@@ -166,7 +166,7 @@ export function GuideExperience() {
             {habits.map((habit, index) => <button type="button" className={activeHabit === index ? styles.activeHabit : undefined} onClick={() => setActiveHabit(index)} aria-pressed={activeHabit === index} key={habit.book}><span>{habit.number}</span><strong>{habit.title}</strong></button>)}
           </nav>
           <article className={styles.habitCard}>
-            <div className={styles.bookSpine}><Image src="/media/cards/habit-lab.png" alt="" width={280} height={280} sizes="(max-width: 620px) 160px, 210px" aria-hidden="true" /><span>{habits[activeHabit].book}</span><small>{habits[activeHabit].author}</small></div>
+            <div className={styles.bookSpine}><Image src="/media/cards/habit-lab.webp" alt="" width={280} height={280} sizes="(max-width: 620px) 160px, 210px" aria-hidden="true" /><span>{habits[activeHabit].book}</span><small>{habits[activeHabit].author}</small></div>
             <div className={styles.habitContent}>
               <span>THE IDEA</span>
               <h3>{habits[activeHabit].title}</h3>

@@ -65,3 +65,26 @@ def test_trade_plan_never_exceeds_risk_budget_quantity():
     assert result.outputs["position_quantity"] == 20
     assert result.outputs["black_scholes_value"] > 0
     assert len(result.tables_and_chart_series["option_payoff"]) == 41
+
+
+def test_recurring_cashflows_do_not_claim_lump_sum_cagr():
+    result = calculate_returns(CalculationRequest("returns", {"cashflows": [{"date": "2025-01-01", "amount": -1000}, {"date": "2025-07-01", "amount": -1000}], "ending_value": 2200}, as_of_date=date(2026, 1, 1)))
+    assert result.outputs["cagr"] is None
+    assert result.outputs["xirr"] is not None
+
+
+def test_dcf_with_invalid_terminal_spread_withholds_the_entire_valuation():
+    result = calculate_dcf(CalculationRequest("dcf", {"fcff": 1000, "terminal_growth": 0.9}))
+    assert result.outputs["terminal_value"] is None
+    assert result.outputs["value_per_share"] is None
+
+
+def test_dcf_does_not_convert_negative_cashflow_into_a_zero_cashflow_valuation():
+    result = calculate_dcf(CalculationRequest("dcf", {"fcff": -1000}))
+    assert result.outputs["value_per_share"] is None
+
+
+def test_trade_rejects_a_target_and_stop_on_the_same_side():
+    result = calculate_trade_plan(CalculationRequest("trade", {"capital": 100000, "entry": 100, "stop": 90, "target": 80}))
+    assert result.outputs["risk_reward_ratio"] is None
+    assert result.outputs["position_quantity"] == 0

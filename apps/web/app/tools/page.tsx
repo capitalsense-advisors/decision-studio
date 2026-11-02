@@ -21,10 +21,10 @@ type Goal = {
 };
 
 const GOALS: Goal[] = [
-  { id: "crore", numeral: "01", name: "My first crore", line: "Build a seven-figure milestone", target: 10_000_000, targetMax: 30_000_000, years: 15, inflationAdjusted: true, media: "/media/cards/goal-first-crore.png" },
-  { id: "home", numeral: "02", name: "A place of my own", line: "Prepare the future down payment", target: 3_000_000, targetMax: 15_000_000, years: 7, inflationAdjusted: true, media: "/media/cards/goal-home.png" },
-  { id: "freedom", numeral: "03", name: "Financial freedom", line: "Create room to choose your time", target: 18_000_000, targetMax: 60_000_000, years: 20, inflationAdjusted: true, media: "/media/cards/goal-freedom.png" },
-  { id: "custom", numeral: "04", name: "Something personal", line: "Shape a goal that is only yours", target: 5_000_000, targetMax: 50_000_000, years: 10, inflationAdjusted: true, media: "/media/cards/goal-personal.png" },
+  { id: "crore", numeral: "01", name: "My first crore", line: "Build a seven-figure milestone", target: 10_000_000, targetMax: 30_000_000, years: 15, inflationAdjusted: true, media: "/media/cards/goal-first-crore.webp" },
+  { id: "home", numeral: "02", name: "A place of my own", line: "Prepare the future down payment", target: 3_000_000, targetMax: 15_000_000, years: 7, inflationAdjusted: true, media: "/media/cards/goal-home.webp" },
+  { id: "freedom", numeral: "03", name: "Financial freedom", line: "Create room to choose your time", target: 18_000_000, targetMax: 60_000_000, years: 20, inflationAdjusted: true, media: "/media/cards/goal-freedom.webp" },
+  { id: "custom", numeral: "04", name: "Something personal", line: "Shape a goal that is only yours", target: 5_000_000, targetMax: 50_000_000, years: 10, inflationAdjusted: true, media: "/media/cards/goal-personal.webp" },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -68,7 +68,7 @@ export default function FutureMePage() {
   const saferWithinRange = saferMonthly <= 250_000;
   const status = conservativeOnTrack ? "On track" : baseOnTrack ? "Close, but fragile" : "A gap to close";
   const read = conservativeOnTrack
-    ? `Your current rhythm reaches ${goal.name.toLowerCase()} even in the lower-return check.`
+    ? `Your current rhythm reaches ${goal.name.toLowerCase()} even in the lower-return check, with inflation unchanged.`
     : baseOnTrack
       ? `The base case reaches this goal, but a 2% lower return leaves a gap. This plan is close, but it has little room for error.`
       : `You are building momentum, but the current plan reaches about ${percentReady}% of this goal.`;
@@ -134,9 +134,9 @@ export default function FutureMePage() {
           <header><span>Your decision</span><i className={conservativeOnTrack ? "on-track" : "needs-work"}>{status}</i></header>
           <div className="future-outcome">
             <span>Best next move</span>
-            <strong>{conservativeOnTrack ? "Keep this rhythm" : saferWithinRange ? `Add ${money(saferDelta, true)} / month` : "Give the goal more time"}</strong>
+            <strong>{emergencyReady === false ? "Build your emergency cushion first" : conservativeOnTrack ? "Keep this rhythm" : saferWithinRange ? `Add ${money(saferDelta, true)} / month` : "Give the goal more time"}</strong>
             <p>{conservativeOnTrack
-              ? `${money(monthly, true)} monthly reaches the goal even with a lower return.`
+              ? `${money(monthly, true)} monthly reaches the goal even with a lower return; inflation is unchanged.`
               : saferWithinRange
                 ? `Invest ${money(saferMonthly, true)} monthly to stay on track even if returns are 2% lower.`
                 : `The safer monthly amount is ${money(saferMonthly, true)}. Extend the timeline or lower the goal.`}</p>
@@ -149,7 +149,7 @@ export default function FutureMePage() {
             <div><span>Safer check</span><strong>{money(result.conservativeCorpus, true)}</strong></div>
           </div>
           <FutureChart baseline={result.series} conservative={result.conservativeSeries} initialCorpus={savings} initialTarget={target} years={years} />
-          <small className="result-caption">Educational estimate using your assumptions. Taxes, fees, and market swings are not included.</small>
+          <small className="result-caption">Lower-return check reduces return by 2 percentage points and keeps inflation unchanged; test higher inflation separately. Educational estimate using your assumptions. Taxes, fees, and market swings are not included.</small>
         </aside>
       </section>
     </div>
@@ -180,6 +180,7 @@ function FutureChart({ baseline, conservative, initialCorpus, initialTarget, yea
   return <figure className="future-chart compact-chart">
     <figcaption><span>Projection</span><div><i className="expected"/>Expected <i className="safer"/>Safer <i className="target"/>Target</div></figcaption>
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Projection chart comparing expected, safer, and target paths over ${years} years`} preserveAspectRatio="xMidYMid meet">
+      <title>Goal projection</title><desc>At year {years}: target {money(endBase.target)}, expected corpus {money(endBase.corpus)}, lower-return corpus {money(endSafe.corpus)}. Inflation is unchanged in the lower-return check.</desc>
       <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9cb0ff" stopOpacity=".22"/><stop offset="1" stopColor="#9cb0ff" stopOpacity=".02"/></linearGradient></defs>
       {[0, .5, 1].map((tick) => <g key={tick}><line className="chart-grid" x1={plot.left} x2={width - plot.right} y1={y(maximum * tick)} y2={y(maximum * tick)}/>{tick > 0 && <text className="chart-y-label" x={plot.left - 8} y={y(maximum * tick) + 4}>{money(maximum * tick, true)}</text>}</g>)}
       <path className="chart-band" d={band} fill={`url(#${gradientId})`}/>

@@ -20,28 +20,31 @@ export class UpstreamFailure extends Error {
 
 type FetchJsonOptions = {
   headers?: HeadersInit;
-  revalidate: number;
   timeoutMs?: number;
+  retries?: number;
 };
 
 export async function fetchJson(
   url: string,
-  { headers, revalidate, timeoutMs = 8_000 }: FetchJsonOptions,
+  { headers, timeoutMs = 8_000, retries = 1 }: FetchJsonOptions = {},
 ): Promise<unknown> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, {
-      cache: "force-cache",
+    let response = await fetch(url, {
+      // Only validated route responses may be cached. Never retain an invalid upstream payload.
+      cache: "no-store",
       headers,
-      next: { revalidate },
       signal: controller.signal,
     });
 
-    if (!response.ok) {
-      throw new UpstreamFailure("http", response.status);
+    // Retry a transient HTTP failure once within the original timeout budget.
+    if (retries > 0 && (response.status === 429 || response.status >= 500)) {
+      await response.body?.cancel();
+      response = await fetch(url, { cache: "no-store", headers, signal: controller.signal });
     }
+    if (!response.ok) throw new UpstreamFailure("http", response.status);
 
     try {
       return await response.json();
@@ -107,4 +110,16 @@ export function upstreamProblem(error: unknown, detail: string, route: string) {
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export async function mapConcurrent<T, R>(items: T[], limit: number, work: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await work(items[index]);
+    }
+  }));
+  return results;
 }

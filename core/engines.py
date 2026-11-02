@@ -79,12 +79,14 @@ def calculate_returns(request: CalculationRequest) -> CalculationResult:
     gain = ending_value - invested
     start_dates = [when for when, amount in cashflows if amount < 0]
     years = max((as_of - min(start_dates)).days / 365.25, 0) if start_dates else 0
-    cagr = ((ending_value / invested) ** (1 / years) - 1) if invested > 0 and ending_value > 0 and years > 0 else None
+    cagr = ((ending_value / invested) ** (1 / years) - 1) if len(start_dates) == 1 and len(cashflows) == 2 and invested > 0 and ending_value > 0 and years > 0 else None
 
     period_returns = np.asarray(request.inputs.get("period_returns", []), dtype=float)
     period_returns = period_returns[np.isfinite(period_returns)]
     twrr = float(np.prod(1 + period_returns) - 1) if period_returns.size else None
     warnings = []
+    if cagr is None:
+        warnings.append("CAGR is only available for a single initial investment without interim cashflows; use XIRR for recurring contributions.")
     if xirr_value is None:
         warnings.append("XIRR needs at least one contribution and one positive ending value or withdrawal.")
     if not period_returns.size:
@@ -211,7 +213,7 @@ def calculate_goal_plan(request: CalculationRequest) -> CalculationResult:
 
 
 def calculate_dcf(request: CalculationRequest) -> CalculationResult:
-    fcff = max(0.0, _finite(request.inputs.get("fcff")))
+    fcff = _finite(request.inputs.get("fcff"))
     growth = _finite(request.inputs.get("growth"), 0.12)
     terminal_growth = _finite(request.inputs.get("terminal_growth"), 0.05)
     beta = max(0.0, _finite(request.inputs.get("beta"), 1.0))
@@ -239,7 +241,11 @@ def calculate_dcf(request: CalculationRequest) -> CalculationResult:
     else:
         terminal_value = current * (1 + terminal_growth) / (wacc - terminal_growth)
         enterprise = pv_sum + terminal_value / (1 + wacc) ** horizon
-    equity_value = enterprise - net_debt
+    if fcff <= 0:
+        warnings.append("A positive base FCFF is required for this simple growth model; valuation is withheld.")
+    if wacc <= terminal_growth or fcff <= 0:
+        enterprise = None
+    equity_value = enterprise - net_debt if enterprise is not None else None
     return _result(
         request,
         {
@@ -248,7 +254,7 @@ def calculate_dcf(request: CalculationRequest) -> CalculationResult:
             "terminal_value": terminal_value,
             "enterprise_value": enterprise,
             "equity_value": equity_value,
-            "value_per_share": equity_value / shares,
+            "value_per_share": equity_value / shares if equity_value is not None else None,
         },
         tables_and_chart_series={"forecast": rows},
         assumptions=["Uses FCFF and Gordon-growth terminal value.", "Cost of equity uses CAPM inputs supplied by the user."],
@@ -291,7 +297,7 @@ def calculate_capital_gains(request: CalculationRequest) -> CalculationResult:
             "long_term": long_term,
             "tax_rate_used": rate,
         },
-        assumptions=[f"Tax-year assumptions: {request.tax_year or 'FY 2026-27 estimate'}.", "Tax rates and exemption are editable planning assumptions."],
+        assumptions=[f"Tax-year assumptions: {request.tax_year or 'FY 2026-27 estimate'}.", "Tax rates and exemption are editable planning assumptions. Enter only the remaining annual exemption after other disposals; it is not a new allowance for each calculation."],
         warnings=["This is an indicative capital-gains estimate, not a tax return or tax advice. Surcharge, cess, set-off, grandfathering, and special cases are excluded."],
         data_quality=["Uses user-selected asset type, holding period, and rate assumptions."],
     )
@@ -324,8 +330,14 @@ def calculate_trade_plan(request: CalculationRequest) -> CalculationResult:
     quantity = min(risk_quantity, capital_quantity)
     gross_exposure = quantity * entry
     charges = gross_exposure * charges_rate * 2
+    valid_direction = entry > 0 and ((stop < entry < target) or (target < entry < stop))
+    if not valid_direction:
+        trade_warnings.append("Target and stop must be on opposite sides of entry. Position size and risk/reward are withheld.")
+        quantity = 0
+        gross_exposure = 0
+        charges = 0
     reward_per_unit = abs(target - entry)
-    risk_reward = reward_per_unit / per_unit_risk if per_unit_risk else None
+    risk_reward = reward_per_unit / per_unit_risk if per_unit_risk and valid_direction else None
 
     spot = max(0.0, _finite(request.inputs.get("option_spot")))
     strike = max(0.0, _finite(request.inputs.get("option_strike")))

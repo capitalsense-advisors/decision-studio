@@ -1,3 +1,4 @@
+import { statusFrom } from "./ipo-status.mjs";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -27,14 +28,7 @@ const numberFrom = (value) => {
   return match ? Number(match[0]) : null;
 };
 
-const statusFrom = (value = "") => {
-  const text = value.toLowerCase();
-  if (text.includes("live") || text.includes("open")) return "open";
-  if (text.includes("listed")) return "listed";
-  if (text.includes("allotment") || text.includes("closed")) return "closed";
-  if (text.includes("coming") || text.includes("upcoming")) return "upcoming";
-  return "announced";
-};
+
 
 const extractStat = (html, label) => {
   const pattern = new RegExp(`<span[^>]*ipo-card-secondary-label[^>]*>\\s*${label}\\s*<\\/span>\\s*<span[^>]*ipo-card-body-value[^>]*>([\\s\\S]*?)<\\/span>`, "i");
@@ -223,7 +217,7 @@ for (const raw of ipoAlertsItems) {
   };
   Object.assign(target, {
     symbol: raw.symbol ?? target.symbol,
-    status: raw.status ?? target.status,
+    status: raw.status ? statusFrom(raw.status) : target.status,
     openDate: raw.startDate ?? target.openDate,
     closeDate: raw.endDate ?? target.closeDate,
     listingDate: raw.listingDate ?? target.listingDate,
@@ -249,6 +243,8 @@ const items = merged
   .filter((item) => item.name && item.status !== "listed")
   .sort((a, b) => ({ open: 0, closed: 1, upcoming: 2, announced: 3 }[a.status] - { open: 0, closed: 1, upcoming: 2, announced: 3 }[b.status]));
 
+if (!items.length) throw new Error("No valid mainboard items were collected; previous snapshot remains unchanged.");
+
 const snapshot = {
   generatedAt: fetchedAt,
   expiresAt: new Date(now.getTime() + minimumAgeMinutes * 60000).toISOString(),
@@ -259,7 +255,7 @@ const snapshot = {
     { name: "IPOAlerts", url: "https://ipoalerts.in", fetchedAt, note: "Structured public-offer data. Free plan is cached and quota-limited." },
     { name: "IPOJi", url: "https://www.ipoji.com/ipo?ipoType=mainboard", fetchedAt, note: "Public mainboard snapshot, valuation fields, GMP context, and RHP links." },
   ],
-  items: items.length ? items : (previous?.items ?? []),
+  items,
 };
 
 await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");

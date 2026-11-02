@@ -31,7 +31,7 @@ def test_parse_holdings_csv_accepts_approved_template_and_aliases():
     )
 
     assert result.warnings == []
-    assert result.confidence == 0.92
+    assert result.confidence == 1.0
     assert result.records == [
         {
             "symbol": "RELIANCE",
@@ -51,3 +51,10 @@ def test_parse_holdings_csv_limits_public_session_rows():
 
     assert len(result.records) == 200
     assert "Only the first 200 rows were loaded for this public-app session." in result.warnings
+
+
+def test_invalid_numbers_are_not_zero_or_high_confidence():
+    result = parse_holdings_csv(b"symbol,quantity,current_price\nA,bad,10\n")
+    assert result.records[0]["quantity"] is None
+    assert result.confidence == 0.5
+    assert any("invalid" in warning for warning in result.warnings)

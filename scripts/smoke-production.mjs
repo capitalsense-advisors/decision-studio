@@ -1,3 +1,4 @@
+import { cp } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
@@ -5,6 +6,11 @@ const port = Number(process.env.SMOKE_PORT ?? 3199);
 const origin = `http://127.0.0.1:${port}`;
 const release = "production-smoke-check";
 const serverPath = resolve("apps/web/.next/standalone/apps/web/server.js");
+
+// Assemble the same static/public layout as the Docker runner.
+const appRoot = resolve("apps/web/.next/standalone/apps/web");
+await cp(resolve("apps/web/.next/static"), resolve(appRoot, ".next/static"), { recursive: true });
+await cp(resolve("apps/web/public"), resolve(appRoot, "public"), { recursive: true });
 
 const server = spawn(process.execPath, [serverPath], {
   env: {
@@ -73,6 +79,20 @@ try {
   assert(healthResponse.ok, "Health endpoint did not return a successful status.");
   assert(health.status === "ok", "Health endpoint did not report an ok status.");
   assert(health.release === release, "Health endpoint did not expose the runtime release.");
+  const homeHtml = await pageResponse.text();
+  const csp = pageResponse.headers.get("content-security-policy") ?? "";
+  const scriptPolicy = csp.split(";").find((part) => part.trim().startsWith("script-src")) ?? "";
+  const nonce = scriptPolicy.match(/'nonce-([^']+)'/)?.[1];
+  assert(nonce && homeHtml.includes(`nonce="${nonce}"`), "HTML scripts lack the request CSP nonce.");
+  assert(!scriptPolicy.includes("unsafe-inline"), "Production scripts permit arbitrary inline execution.");
+  const scriptPath = homeHtml.match(/src="([^" ]*\/_next\/static\/[^" ]+\.js[^" ]*)"/)?.[1];
+  assert(scriptPath, "Home page has no framework script asset.");
+  const [scriptAsset, cardAsset] = await Promise.all([
+    fetch(new URL(scriptPath.replaceAll("&amp;", "&"), origin)),
+    fetch(`${origin}/media/cards/goal-first-crore.webp`),
+  ]);
+  assert(scriptAsset.ok, "Production framework script is missing.");
+  assert(cardAsset.ok && cardAsset.headers.get("content-type")?.startsWith("image/"), "Production card asset is missing.");
   assert(pageResponse.ok, "Home page did not return a successful status.");
   assert(smallcasesResponse.ok, "Smallcases page did not return a successful status.");
   assert(smallcasesPage.includes("Three ways to read"), "Smallcases page did not include its strategy studio.");

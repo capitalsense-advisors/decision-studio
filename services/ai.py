@@ -41,8 +41,8 @@ Respond with exactly these concise sections:
     except Exception as e:
         error_str = str(e).lower()
         if "503" in error_str or "unavailable" in error_str or "429" in error_str or "quota" in error_str:
-            return "?? **AI Insights Temporarily Unavailable**\n\nThe Gemini AI model is currently experiencing high demand. Please try again."
-        return f"?? **Error Fetching Insights:**\n\n{str(e)}"
+            return "⚠ **AI Insights Temporarily Unavailable**\n\nThe Gemini AI model is currently experiencing high demand. Please try again."
+        return "⚠ **AI explanation unavailable.** Please try again later."
 
 
 def extract_image_records(api_key: str, model: str, image: Any) -> ExtractionResult:
@@ -62,8 +62,8 @@ Do not infer missing values. Do not return account numbers, PAN, addresses, or o
             config={"response_mime_type": "application/json"},
         )
         payload = json.loads(response.text or "{}")
-    except Exception as e:
-        payload = {"warnings": [f"AI Error: {str(e)}"]}
+    except Exception:
+        payload = {"warnings": ["Image extraction is unavailable. Please try again or enter holdings manually."]}
     records = payload.get("records", [])
     if not isinstance(records, list):
         records = []

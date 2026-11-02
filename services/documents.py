@@ -54,6 +54,8 @@ def parse_holdings_csv(raw: bytes) -> ExtractionResult:
     if "symbol" not in matched:
         return ExtractionResult(warnings=["CSV needs a symbol/ticker/security column."], confidence=0.0)
     records = []
+    invalid_cells = 0
+    numeric_cells = 0
     for _, row in frame.head(200).iterrows():
         symbol = str(row[matched["symbol"]]).strip().upper()
         if not symbol or symbol == "NAN":
@@ -62,16 +64,23 @@ def parse_holdings_csv(raw: bytes) -> ExtractionResult:
         for target in ("quantity", "average_cost", "current_price", "value"):
             if target in matched:
                 record[target] = pd.to_numeric(row[matched[target]], errors="coerce")
-                record[target] = 0.0 if pd.isna(record[target]) else float(record[target])
+                numeric_cells += 1
+                if pd.isna(record[target]):
+                    invalid_cells += 1
+                    record[target] = None
+                else:
+                    record[target] = float(record[target])
         if not record.get("value") and record.get("quantity") and record.get("current_price"):
             record["value"] = record["quantity"] * record["current_price"]
         records.append(record)
     warnings = []
+    if invalid_cells:
+        warnings.append(f"{invalid_cells} numeric cells are missing or invalid; review them before analysis.")
     if len(frame) > 200:
         warnings.append("Only the first 200 rows were loaded for this public-app session.")
     if not any(record.get("value", 0) for record in records):
         warnings.append("Add market value or quantity and current price to calculate concentration.")
-    return ExtractionResult(records=records, confidence=0.92 if records else 0.0, warnings=warnings)
+    return ExtractionResult(records=records, confidence=round((numeric_cells - invalid_cells) / numeric_cells, 2) if records and numeric_cells else 0.0, warnings=warnings)
 
 
 def prepare_image(raw: bytes, mime_type: str) -> tuple[Image.Image | None, str | None]:

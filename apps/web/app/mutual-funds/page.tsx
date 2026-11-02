@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { freshnessWarning } from "@/lib/freshness";
 import { ResultNotes } from "@/components/ui";
 import { benchmarkComparison, portfolioRisk, returnsFromPrices, rollingReturnSummary, trailingReturns } from "@/lib/calculations";
 import { money, percent } from "@/lib/format";
@@ -44,9 +45,10 @@ export type FundFitInput = {
 
 export function benchmarkForCategory(category: string) {
   const value = category.toLowerCase();
-  if (value.includes("small cap")) return { label: "Nifty Smallcap 250 ETF proxy", ticker: "HDFCSML250.NS" };
-  if (value.includes("mid cap")) return { label: "Nifty Midcap 50", ticker: "^NSEMDCP50" };
-  if (/large cap|flexi cap|multi cap|focused|value|contra|dividend|elss|equity|index/.test(value)) return { label: "Nifty 50 broad-market proxy", ticker: "^NSEI" };
+  if (classifyFund(category) !== "equity" || /sector|thematic|large & mid|large and mid/.test(value)) return null;
+  if (value.includes("small cap")) return { label: "Nifty Smallcap 250 ETF price proxy", ticker: "HDFCSML250.NS" };
+  if (value.includes("mid cap")) return { label: "Nifty Midcap 50 price index proxy", ticker: "^NSEMDCP50" };
+  if (/large cap|flexi cap|multi cap|focused|value|contra|dividend|elss/.test(value)) return { label: "Nifty 50 price index proxy", ticker: "^NSEI" };
   return null;
 }
 
@@ -62,11 +64,11 @@ const DROP_OPTIONS: Array<{ id: DropComfort; label: string; copy: string; limit:
   { id: "high", label: "I accept deep market falls", copy: "I understand that 30% or more can happen.", limit: 0.35 },
 ];
 
-function classifyFund(category: string): FundKind {
+export function classifyFund(category: string): FundKind {
   const value = category.toLowerCase();
-  if (/equity|index|elss|large cap|mid cap|small cap|flexi cap|multi cap|sector|thematic/.test(value)) return "equity";
   if (/hybrid|balanced|asset allocation|multi asset|arbitrage/.test(value)) return "hybrid";
   if (/debt|liquid|overnight|money market|gilt|duration|bond|income|credit risk/.test(value)) return "debt";
+  if (/equity|elss|large cap|mid cap|small cap|flexi cap|multi cap|sector|thematic/.test(value)) return "equity";
   return "other";
 }
 
@@ -80,7 +82,7 @@ export function evaluateFundFit({ category, observations, maxDrawdown, brief }: 
   const tolerance = DROP_OPTIONS.find((option) => option.id === brief.dropComfort)?.limit ?? 0.2;
   const minimumYears = kind === "equity" ? 5 : kind === "hybrid" ? 3 : 0;
   const timeMismatch = brief.horizonYears < minimumYears;
-  const dropMismatch = maxDrawdown !== null && Math.abs(maxDrawdown) > tolerance + 0.04;
+  const dropMismatch = maxDrawdown !== null && Math.abs(maxDrawdown) > tolerance;
   const shortHistory = observations < 756;
   const concentrated = /sector|thematic/.test(category.toLowerCase());
   const seriousMismatch = timeMismatch || (brief.goal === "soon" && kind !== "debt");
@@ -265,7 +267,7 @@ export default function MutualFundsPage() {
       if (!response.ok || !Array.isArray(payload)) throw new Error(payload?.detail ?? "Search failed.");
       const matches = (payload as Scheme[]).filter(isDirectGrowth);
       setSchemes(matches);
-      if (!matches.length) setError("No Direct Growth plans matched. Try fewer words from the scheme name.");
+      if (!matches.length) setError("No Direct Growth plans matched. Regular and IDCW plans are not supported: their fees or distributions differ. Try the scheme name without the plan suffix.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Search failed.");
     } finally {
@@ -437,7 +439,7 @@ export default function MutualFundsPage() {
           <span>02 / Pick a fund</span>
           <div>
             <h2 id="finder-title">Search the scheme you are considering.</h2>
-            <p>We keep only Direct Growth plans so the comparison starts on cleaner terms.</p>
+            <p>Only Direct Growth plans are supported. Regular plans have different fees; IDCW distributions are not included in this NAV analysis.</p>
           </div>
         </div>
         <div
@@ -633,10 +635,11 @@ export default function MutualFundsPage() {
             </div>
           </section>
 
+          {freshnessWarning(analysis.last.date) && <p className={styles.peerNote} role="status">NAV as of {analysis.last.date}: {freshnessWarning(analysis.last.date)}</p>}
           <section className={styles.benchmarkSection} aria-labelledby="benchmark-title">
             <header>
-              <div><span>Benchmark reality check</span><h3 id="benchmark-title">Did the fund earn its extra risk?</h3></div>
-              <p>Compared over shared dates with a public market proxy. This is context, not the scheme&apos;s official benchmark record.</p>
+              <div><span>Benchmark reality check</span><h3 id="benchmark-title">Fund NAV versus a price-only proxy</h3></div>
+              <p>Fund Growth NAV includes reinvested income; the proxy excludes dividends. This biases the comparison in the fund’s favour and cannot establish outperformance against a total-return benchmark.</p>
             </header>
             {benchmarkLoading && <div className={styles.peerLoading}><i /><span>Aligning benchmark dates...</span></div>}
             {!benchmarkLoading && benchmark && analysis.relative && <>
@@ -653,10 +656,10 @@ export default function MutualFundsPage() {
               <div className={styles.benchmarkLead}>
                 <div><span>Fund annualised</span><strong>{percent(analysis.relative.fundAnnualReturn)}</strong></div>
                 <div><span>{benchmark.label}</span><strong>{percent(analysis.relative.benchmarkAnnualReturn)}</strong></div>
-                <div className={analysis.relative.activeAnnualReturn >= 0 ? styles.benchmarkPositive : styles.benchmarkNegative}><span>Active return</span><strong>{percent(analysis.relative.activeAnnualReturn)}</strong></div>
+                <div className={analysis.relative.activeAnnualReturn >= 0 ? styles.benchmarkPositive : styles.benchmarkNegative}><span>NAV minus price-only return</span><strong>{percent(analysis.relative.activeAnnualReturn)}</strong></div>
               </div>
               <div className={styles.benchmarkDetail}>
-                <article><span>Risk-adjusted alpha</span><strong>{percent(analysis.relative.alpha)}</strong><small>CAPM estimate using a 6.5% risk-free assumption</small></article>
+                <article><span>Alpha vs price-only proxy</span><strong>{percent(analysis.relative.alpha)}</strong><small>Arithmetic daily CAPM estimate, annualised; 6.5% risk-free assumption. Not total-return alpha.</small></article>
                 <article><span>Beta</span><strong>{analysis.relative.beta?.toFixed(2) ?? "Not available"}</strong><small>How strongly the fund moved with the proxy</small></article>
                 <article><span>Tracking error</span><strong>{percent(analysis.relative.trackingError)}</strong><small>Variability of return differences</small></article>
                 <article><span>Information ratio</span><strong>{analysis.relative.informationRatio?.toFixed(2) ?? "Not available"}</strong><small>Active return per unit of tracking error</small></article>
@@ -682,9 +685,9 @@ export default function MutualFundsPage() {
                   <article>
                     <span>Three-year CAGR</span>
                     <strong>{selectedCatalog.cagr3yPct !== null && peerMedians.cagr3yPct !== null
-                      ? selectedCatalog.cagr3yPct >= peerMedians.cagr3yPct ? "Above the category median" : "Below the category median"
+                      ? selectedCatalog.cagr3yPct >= peerMedians.cagr3yPct ? "Above this snapshot sample median" : "Below this snapshot sample median"
                       : "Not enough history"}</strong>
-                    <small>Your fund {percentagePoints(selectedCatalog.cagr3yPct)}. Median {percentagePoints(peerMedians.cagr3yPct)}.</small>
+                    <small>Undated catalog: your fund {percentagePoints(selectedCatalog.cagr3yPct)}. Median {percentagePoints(peerMedians.cagr3yPct)}.</small>
                   </article>
                   <article>
                     <span>Expense ratio</span>
@@ -718,7 +721,7 @@ export default function MutualFundsPage() {
                     </tbody>
                   </table>
                 </div>
-                <p className={styles.peerLimit}>Source: {catalogSource || "User-supplied catalog"}. Snapshot date: {catalogAsOf ?? "not supplied"}. CAGR, expense ratio, and AUM may have changed. Peer rows do not include current holdings, portfolio overlap, or the official Riskometer.</p>
+                <p className={styles.peerLimit}>Source: {catalogSource || "User-supplied catalog"}. Snapshot date: {catalogAsOf ?? "unknown; do not treat as current"}. Sample: {peers.length} largest-AUM growth plans in the supplied category, plus the selected fund when absent. Return coverage {peers.filter((p) => p.cagr3yPct !== null).length}/{peers.length}; cost coverage {peers.filter((p) => p.expenseRatioPct !== null).length}/{peers.length}. CAGR, expense ratio, and AUM may have changed. Peer rows do not include current holdings, portfolio overlap, or the official Riskometer.</p>
               </>
             )}
             {!peersLoading && peerNote && <p className={styles.peerNote}>{peerNote}</p>}
@@ -741,7 +744,7 @@ export default function MutualFundsPage() {
           <ResultNotes
             assumptions={[
               "NAV history is sourced from mfapi.in using AMFI-published data.",
-              "Category peer metrics come from the supplied 600-fund catalog and are shown as an undated snapshot.",
+              "Category peer metrics come from a supplied undated catalog and are not current market evidence.",
               "The first-pass fit uses scheme category, your timeline, your stated loss comfort, and historical NAV behavior.",
               "Annualisation uses 252 daily observations for risk metrics.",
             ]}

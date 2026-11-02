@@ -61,3 +61,18 @@ export const emptyIpoSnapshot: IpoSnapshot = {
   sources: [],
   items: [],
 };
+
+/** Dates are Indian exchange calendar dates. Never promote stale "open" labels. */
+export function ipoStatusAt(item: Pick<IpoSnapshotItem, "status" | "openDate" | "closeDate" | "listingDate">, now = new Date()): IpoSnapshotItem["status"] {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  if (item.listingDate && today >= item.listingDate) return "listed";
+  if (item.status === "listed") return "listed";
+  if (item.closeDate && today > item.closeDate) return "closed";
+  if (item.openDate && today < item.openDate) return "upcoming";
+  if (item.openDate && item.closeDate && today >= item.openDate && today <= item.closeDate) return "open";
+  return item.status === "open" ? "announced" : item.status;
+}
+export function snapshotIsStale(snapshot: Pick<IpoSnapshot, "expiresAt">, now = new Date()) {
+  const expires = Date.parse(snapshot.expiresAt);
+  return !Number.isFinite(expires) || now.getTime() >= expires;
+}

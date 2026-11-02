@@ -611,8 +611,27 @@ def guide_page():
         </div>
         """, unsafe_allow_html=True)
 
-from pages.portfolio_risk import portfolio_risk_page
-from pages.mf_analysis import mf_analysis_page
+def portfolio_risk_page():
+    try:
+        from pages.portfolio_risk import portfolio_risk_page as render
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"cs_core", "cs_core.risk"}:
+            raise
+        st.warning("Portfolio Risk is unavailable in this installation. Use the web risk workspace while the shared risk engine is being configured.")
+        return
+    render()
+
+
+def mf_analysis_page():
+    try:
+        from pages.mf_analysis import mf_analysis_page as render
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"cs_core", "cs_core.mf_metrics"}:
+            raise
+        st.warning("MF Analysis is unavailable in this installation. Use the web Fund Match workspace while the shared fund engine is being configured.")
+        return
+    render()
+
 from pages.decision_tools import decision_tools_page
 from pages.holdings import holdings_page
 
