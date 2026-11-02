@@ -20,17 +20,17 @@ const paths = [
     outcome: "Get a realistic plan",
     href: "/tools",
     tone: styles.blue,
-    media: "/media/cards/plan-life.png",
+    media: "/media/cards/plan-life.webp",
   },
   {
     number: "02",
     label: "Check my portfolio",
     title: "Is my money diversified, or just scattered?",
-    copy: "Spot concentration, overlap and risk without decoding a wall of ratios.",
+    copy: "Spot concentration and risk without decoding a wall of ratios.",
     outcome: "See what you really own",
     href: "/portfolio",
     tone: styles.coral,
-    media: "/media/cards/portfolio-balance.png",
+    media: "/media/cards/portfolio-balance.webp",
   },
   {
     number: "03",
@@ -40,7 +40,7 @@ const paths = [
     outcome: "Find a better match",
     href: "/mutual-funds",
     tone: styles.mint,
-    media: "/media/cards/fund-compare.png",
+    media: "/media/cards/fund-compare.webp",
   },
   {
     number: "04",
@@ -50,7 +50,7 @@ const paths = [
     outcome: "Read the full story",
     href: "/smallcases",
     tone: styles.violet,
-    media: "/media/cards/investment-basket.png",
+    media: "/media/cards/investment-basket.webp",
   },
 ];
 

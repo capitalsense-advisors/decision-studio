@@ -95,10 +95,7 @@ function matchRecord(name: string) {
   const exact = data.records.find((record) => normalizeCatalogName(record.name) === wanted);
   if (exact) return exact;
 
-  return data.records.find((record) => {
-    const candidate = normalizeCatalogName(record.name);
-    return candidate.length >= 8 && (candidate.includes(wanted) || wanted.includes(candidate));
-  }) ?? null;
+  return null;
 }
 
 export function getFundCatalogPeers(name: string, limit = 12) {
@@ -111,7 +108,7 @@ export function getFundCatalogPeers(name: string, limit = 12) {
     .slice(0, Math.min(20, Math.max(3, limit)));
 
   if (!peers.some((record) => record.name === selected.name)) {
-    peers[peers.length - 1] = selected;
+    peers.push(selected);
   }
 
   return { selected, peers, source: data.source, asOf: data.asOf };

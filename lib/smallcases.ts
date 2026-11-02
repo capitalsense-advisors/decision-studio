@@ -189,7 +189,7 @@ export const smallcaseStrategies: SmallcaseStrategy[] = [
       periodLabel: "Past 2M",
       periodReturn: -7.84,
       weighting: "Custom weighted",
-      suppliedAt: "User-supplied Smallcase snapshot",
+      suppliedAt: "User-supplied snapshot · 29 October 2026 (capture date unverified)",
     },
     themes: [
       {

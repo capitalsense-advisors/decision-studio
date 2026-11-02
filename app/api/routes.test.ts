@@ -35,7 +35,7 @@ describe("API routes", () => {
     expect(response.status).toBe(200);
     expect(body.board).toBe("Mainboard");
     expect(body.items.length).toBeGreaterThan(0);
-    expect(response.headers.get("cache-control")).toContain("stale-while-revalidate");
+    expect(response.headers.get("cache-control")).toBe("no-store");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

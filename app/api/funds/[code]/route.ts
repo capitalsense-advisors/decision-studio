@@ -10,7 +10,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ code: stri
   }
 
   try {
-    const payload = await fetchJson(`https://api.mfapi.in/mf/${code}`, { revalidate: 86_400 });
+    const payload = await fetchJson(`https://api.mfapi.in/mf/${code}`);
     const fund = normalizeFundDetail(payload);
     if (!fund.points.length) {
       return problemResponse("No NAV history was found for this scheme.", 404, "FUND_NOT_FOUND", ROUTE);

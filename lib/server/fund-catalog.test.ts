@@ -31,3 +31,7 @@ describe("fund catalog", () => {
     expect(getFundSuggestions("WOC Special Opp")[0]?.name).toBe("WOC Special Opp Fund");
   });
 });
+
+it("does not assign analytics using an ambiguous substring", () => {
+ expect(getFundCatalogPeers("Parag Parikh Flexi").selected).toBeNull();
+});

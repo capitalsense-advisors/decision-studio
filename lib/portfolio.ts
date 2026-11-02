@@ -88,34 +88,42 @@ function parseCsvLine(line: string) {
 export function parseHoldingsCsv(text: string) {
   const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((line) => line.trim());
   if (lines.length < 2) return { rows: [] as HoldingDraft[], issues: [{ row: 1, field: "file", message: "The CSV has no holding rows." }] };
-  const headers = parseCsvLine(lines[0]).map((item) => item.toLowerCase().replace(/[\s-]+/g, "_"));
+  const headers = parseCsvLine(lines[0]).map((item) => item.toLowerCase().replace(/[.]/g, "").replace(/[\s-]+/g, "_"));
   const column = (...names: string[]) => headers.findIndex((header) => names.includes(header));
-  const symbolIndex = column("symbol", "ticker", "security");
+  const symbolIndex = column("symbol", "ticker", "security", "instrument");
   const quantityIndex = column("quantity", "qty", "units");
-  const costIndex = column("average_cost", "avg_price", "buy_price", "average_price");
+  const costIndex = column("average_cost", "avg_price", "buy_price", "average_price", "avg_cost", "average_buy_price");
+  const priceIndex = column("current_price", "ltp", "last_price");
+  const importIssues: HoldingIssue[] = [];
   const typeIndex = column("asset_type", "type", "category");
   const missing = [symbolIndex < 0 ? "symbol" : "", quantityIndex < 0 ? "quantity" : "", costIndex < 0 ? "average_cost" : ""].filter(Boolean);
   if (missing.length) return { rows: [] as HoldingDraft[], issues: [{ row: 1, field: "headers", message: `Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.` }] };
 
   const rows = lines.slice(1, 11).map((line, index) => {
     const cells = parseCsvLine(line);
-    const rawType = (cells[typeIndex] ?? "stock").toLowerCase() as AssetType;
+    const typeText = (cells[typeIndex] ?? "stock").trim().toLowerCase();
+    const rawType = ({ "mutual fund": "fund", etf: "fund", equity: "stock" } as Record<string, string>)[typeText] ?? typeText;
+    if (!ASSET_TYPES.has(rawType as AssetType)) importIssues.push({ row: index + 1, field: "assetType", message: `Unsupported asset type "${typeText}". Choose its type before analysis.` });
+    const numeric = (value: string | undefined) => value?.trim() ? Number(value.replaceAll(",", "")) : NaN;
     return createHolding({
       id: `csv-${index + 1}`,
       symbol: normalizeSymbol(cells[symbolIndex] ?? ""),
-      quantity: Number((cells[quantityIndex] ?? "").replaceAll(",", "")),
-      averageCost: Number((cells[costIndex] ?? "").replaceAll(",", "")),
-      assetType: ASSET_TYPES.has(rawType) ? rawType : "stock",
+      quantity: numeric(cells[quantityIndex]),
+      averageCost: numeric(cells[costIndex]),
+      currentPrice: priceIndex >= 0 && numeric(cells[priceIndex]) > 0 ? numeric(cells[priceIndex]) : null,
+      priceSource: priceIndex >= 0 && numeric(cells[priceIndex]) > 0 ? "manual" : "missing",
+      assetType: rawType as AssetType,
     });
   });
 
-  const issues = validateHoldings(rows);
+  const issues = [...importIssues, ...validateHoldings(rows)];
   if (lines.length > 11) issues.push({ row: 11, field: "file", message: "Only the first 10 holdings were imported." });
   return { rows, issues };
 }
 
 export function analyzePortfolio(rows: HoldingDraft[]): PortfolioAnalysis | null {
-  const priced = rows.filter((row) => row.currentPrice !== null && row.currentPrice > 0 && row.quantity > 0);
+  if (!rows.length || validateHoldings(rows).length || rows.some((row) => row.currentPrice === null || !Number.isFinite(row.currentPrice) || row.currentPrice <= 0)) return null;
+  const priced = rows;
   if (!priced.length) return null;
   const values = priced.map((row) => ({ ...row, value: row.quantity * row.currentPrice!, invested: row.quantity * Math.max(0, row.averageCost) }));
   const totalValue = values.reduce((sum, row) => sum + row.value, 0);
@@ -124,7 +132,7 @@ export function analyzePortfolio(rows: HoldingDraft[]): PortfolioAnalysis | null
   const hhi = weighted.reduce((sum, row) => sum + row.weight ** 2, 0);
   const topWeight = weighted[0]?.weight ?? 0;
   const topThreeWeight = weighted.slice(0, 3).reduce((sum, row) => sum + row.weight, 0);
-  const assessment = topWeight >= 0.35 || hhi >= 0.25 ? "Focused" : topWeight >= 0.2 || topThreeWeight >= 0.65 ? "Watch concentration" : "Broadly spread";
+  const assessment = topWeight >= 0.35 || hhi > 0.25 + 1e-10 ? "Focused" : topWeight >= 0.2 || topThreeWeight >= 0.65 ? "Watch concentration" : "Broadly spread";
   const mix = new Map<AssetType, number>();
   weighted.forEach((row) => mix.set(row.assetType, (mix.get(row.assetType) ?? 0) + row.value));
 

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import PortfolioPage from "@/app/portfolio/page";
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -35,7 +36,16 @@ describe("Money Mirror journey", () => {
     await user.click(screen.getByRole("button", { name: "Reveal my mirror" }));
 
     expect(screen.getByText("The Read", { exact: true })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: /doing too much of the portfolio's work/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /small number of positions dominates/ })).toBeTruthy();
     expect(screen.getByText("Reality Check", { exact: true })).toBeTruthy();
   });
+});
+
+it("blocks reveal when even one holding remains unpriced", async () => {
+ const user = userEvent.setup();
+ vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({series:{RELIANCE:[{date:"2026-11-01",value:3000}]}, failures:["TCS","INFY","HDFCBANK"]})));
+ render(<PortfolioPage />);
+ await user.click(screen.getByRole("button", {name:/Try a sample/}));
+ await user.click(screen.getByRole("button", {name:"Check Yahoo prices"}));
+ await waitFor(()=>expect(screen.getByRole("button", {name:"Reveal my mirror"}).hasAttribute("disabled")).toBe(true));
 });

@@ -40,7 +40,7 @@ describe("Deep Dive risk journey", () => {
     await user.click(screen.getByRole("button", { name: "Calculate VaR" }));
 
     expect(await screen.findByRole("heading", { name: "Parametric VaR" })).toBeTruthy();
-    expect(screen.getByRole("status").textContent).toContain("INFY");
+    expect(screen.getAllByRole("status")[0].textContent).toContain("INFY");
     expect(screen.getByText(/59 aligned returns/)).toBeTruthy();
   });
 });

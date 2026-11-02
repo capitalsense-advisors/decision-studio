@@ -41,7 +41,7 @@ export default function SmallcasesPage() {
         <a className="smallcase-hero-action" href="#strategy-studio"><span>Explore the portfolios</span><i aria-hidden="true">↓</i></a>
       </div>
       <div className="smallcase-lenses" aria-label="Three distinct strategy lenses">
-        <Image src="/media/cards/three-strategy-lenses.png" alt="Three overlapping glass lenses representing discovery, delivery, and challenge" width={1024} height={1024} priority sizes="(max-width: 900px) 62vw, 330px" />
+        <Image src="/media/cards/three-strategy-lenses.webp" alt="Three overlapping glass lenses representing discovery, delivery, and challenge" width={1024} height={1024} priority sizes="(max-width: 900px) 62vw, 330px" />
         <span>Discover</span><span>Deliver</span><span>Challenge</span>
       </div>
     </header>
@@ -77,6 +77,7 @@ export default function SmallcasesPage() {
           </aside>
         </section>
 
+        {strategy.snapshot && <p className="source-line" role="status">{strategy.snapshot.suppliedAt}. Prices and performance are historical; verify the current Smallcase factsheet.</p>}
         <section className="strategy-fit" aria-label={`${strategy.name} decision frame`}>
           <div><span>Best used as</span><strong>{signal.bestFor}</strong></div>
           <div><span>Watch closely</span><strong>{signal.watchFor}</strong></div>

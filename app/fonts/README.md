@@ -1,0 +1,1 @@
+Latin variable fonts vendored from @fontsource-variable/manrope@5.3.0 and @fontsource-variable/nunito-sans@5.3.0 (npm). Original SIL Open Font Licenses are included. Builds and browsers require no Google Fonts access.

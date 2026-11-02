@@ -14,9 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const payload = await fetchJson(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(query)}`, {
-      revalidate: 86_400,
-    });
+    const payload = await fetchJson(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(query)}`);
     return jsonResponse(normalizeFundSearch(payload), CACHE.funds);
   } catch (error) {
     return upstreamProblem(error, "Fund search is temporarily unavailable.", ROUTE);
