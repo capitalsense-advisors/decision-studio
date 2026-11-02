@@ -779,3 +779,8 @@ For every product change:
 ## Technical audit remediation — 3 November 2026
 
 Corrected missing-price and missing-IPO-evidence handling, fund-fit/benchmark framing, CSV/currency handling, freshness warnings and risk-tail conventions. Added bounded guide AI access and nonce CSP, vendored licensed fonts for offline-capable builds, reduced card image weight, and addressed decision-text readability and legacy return/error paths. CI now includes Python and parser checks with immutable action pins. Full finding-by-finding decisions, validation and remaining provider/deployment requirements are recorded in [Audit remediation](docs/AUDIT_REMEDIATION.md). No deployment or fresh market-data claim is implied.
+
+
+## Asset-aware Money Mirror — 3 November 2026
+
+Cash balances, debt/FD statement values and physical-gold estimates now use direct current amounts with optional labels and valuation dates, rather than fabricated units or exchange tickers. Mutual funds can use statement value, while listed ETFs keep the units-and-price workflow. Exchange price requests exclude direct-value assets. CSV imports accept both forms. Changing asset type, valuation method or currency clears incompatible amounts. Overall allocation includes every asset; stock concentration and effective stock count use individual stocks only. Unknown original investment amounts withhold aggregate gains without blocking allocation. Fund look-through and debt issuer/maturity risk are explicitly outside the concentration score.
