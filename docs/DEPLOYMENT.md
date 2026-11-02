@@ -15,3 +15,7 @@ Local Worker preview: `pnpm exec vite preview --host 127.0.0.1 --port 3200`. The
 Paid guide AI remains disabled unless GUIDE_AI_ENABLED is explicitly true. Configure shared rate limits and provider billing controls before enabling it. No keys are stored in Git. Expired IPO data remains visibly stale; deployment does not refresh market data.
 
 After Cloudflare's Git build completes, verify `/api/health` reports the deployment commit, the home page and optimized card assets load, scripts pass nonce CSP checks, and the IPO page displays expired data honestly. Pushing a commit is not proof the hosting build has completed.
+
+## Asset-aware holdings update
+
+Source revision `60b84c15cc1139e5ae2574e840bad593f1851a99`. Cash, debt/FDs, physical gold and statement-valued funds use entered current totals. Stock/ETF quotes are fetched separately. Overall allocation covers all assets; concentration applies only within individual stocks. Unknown invested amounts withhold gain calculations. Currency/method changes clear incompatible amounts.

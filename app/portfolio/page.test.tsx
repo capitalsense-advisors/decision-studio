@@ -36,7 +36,7 @@ describe("Money Mirror journey", () => {
     await user.click(screen.getByRole("button", { name: "Reveal my mirror" }));
 
     expect(screen.getByText("The Read", { exact: true })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: /small number of positions dominates/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /small number of positions dominates your stock slice/ })).toBeTruthy();
     expect(screen.getByText("Reality Check", { exact: true })).toBeTruthy();
   });
 });
@@ -48,4 +48,53 @@ it("blocks reveal when even one holding remains unpriced", async () => {
  await user.click(screen.getByRole("button", {name:/Try a sample/}));
  await user.click(screen.getByRole("button", {name:"Check Yahoo prices"}));
  await waitFor(()=>expect(screen.getByRole("button", {name:"Reveal my mirror"}).hasAttribute("disabled")).toBe(true));
+});
+
+it("adapts cash entry to a balance and reveals allocation without a price request", async () => {
+ const user = userEvent.setup(); const fetchMock = vi.fn(); vi.stubGlobal("fetch",fetchMock);
+ render(<PortfolioPage />);
+ await user.click(screen.getByRole("button",{name:/Add them one by one/}));
+ await user.selectOptions(screen.getByRole("combobox",{name:"Asset type holding 1"}),"cash");
+ expect(screen.queryByRole("spinbutton",{name:/Quantity/})).toBeNull();
+ expect(screen.queryByRole("textbox",{name:/Symbol holding/})).toBeNull();
+ expect(screen.queryByRole("spinbutton",{name:/Average cost/})).toBeNull();
+ expect(screen.getByRole("button",{name:"Check Yahoo prices"}).hasAttribute("disabled")).toBe(true);
+ await user.type(screen.getByRole("spinbutton",{name:"Cash balance holding 1"}),"50000");
+ await user.click(screen.getByRole("button",{name:"Reveal my mirror"}));
+ expect(screen.getByRole("heading",{name:"Cash makes up 100.0% of this snapshot."})).toBeTruthy();
+ expect(screen.getByText(/No individual stocks entered/)).toBeTruthy();
+ expect(fetchMock).not.toHaveBeenCalled();
+});
+it("keeps FD and gold values out of Yahoo requests and clears stale values on type changes", async () => {
+ const user = userEvent.setup();
+ const fetchMock = vi.fn().mockResolvedValue(Response.json({series:{ABC:[{date:"2026-11-03",value:100}]},failures:[]}));
+ vi.stubGlobal("fetch",fetchMock); render(<PortfolioPage />);
+ await user.click(screen.getByRole("button",{name:/Add them one by one/}));
+ await user.type(screen.getByRole("textbox",{name:"Symbol holding 1"}),"ABC");
+ await user.type(screen.getByRole("spinbutton",{name:"Quantity ABC"}),"2");
+ await user.type(screen.getByRole("spinbutton",{name:"Average cost ABC"}),"80");
+ await user.click(screen.getByRole("button",{name:/Add holding/}));
+ await user.selectOptions(screen.getByRole("combobox",{name:"Asset type holding 2"}),"debt");
+ await user.type(screen.getByRole("textbox",{name:"Label holding 2"}),"My FD");
+ await user.type(screen.getByRole("spinbutton",{name:"Current value holding 2"}),"11000");
+ await user.click(screen.getByRole("button",{name:/Add holding/}));
+ await user.selectOptions(screen.getByRole("combobox",{name:"Asset type holding 3"}),"gold");
+ await user.type(screen.getByRole("spinbutton",{name:"Current value holding 3"}),"25000");
+ await user.click(screen.getByRole("button",{name:"Check Yahoo prices"}));
+ await waitFor(()=>expect(screen.getByRole("button",{name:"Reveal my mirror"}).hasAttribute("disabled")).toBe(false));
+ expect(fetchMock).toHaveBeenCalledWith("/api/market/history?market=india&symbols=ABC");
+ expect((screen.getByRole("spinbutton",{name:"Current value holding 2"}) as HTMLInputElement).value).toBe("11000");
+ await user.selectOptions(screen.getByRole("combobox",{name:"Asset type holding 3"}),"cash");
+ expect((screen.getByRole("spinbutton",{name:"Cash balance holding 3"}) as HTMLInputElement).value).toBe("");
+ expect(screen.getByRole("button",{name:"Reveal my mirror"}).hasAttribute("disabled")).toBe(true);
+});
+it("allows a mutual fund statement value without an exchange symbol", async () => {
+ const user = userEvent.setup(); render(<PortfolioPage />);
+ await user.click(screen.getByRole("button",{name:/Add them one by one/}));
+ await user.selectOptions(screen.getByRole("combobox",{name:"Asset type holding 1"}),"fund");
+ await user.selectOptions(screen.getByRole("combobox",{name:"Valuation method holding 1"}),"value");
+ await user.type(screen.getByRole("spinbutton",{name:"Current value holding 1"}),"30000");
+ await user.click(screen.getByRole("button",{name:"Reveal my mirror"}));
+ expect(screen.getByText(/Amount invested is missing/)).toBeTruthy();
+ expect(screen.getByRole("button",{name:"Check Yahoo prices"}).hasAttribute("disabled")).toBe(true);
 });
