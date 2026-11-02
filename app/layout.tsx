@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { InstallApp } from "@/components/install-app";
 import { PrimaryNav } from "@/components/primary-nav";
 import { ThemeControl } from "@/components/theme-control";
 import "./globals.css";
@@ -15,6 +16,8 @@ const displayFont = localFont({ src: "./fonts/nunito-sans-latin.woff2", weight: 
 export const metadata: Metadata = {
   title: { default: "Paisaan by CapitalSense", template: "%s | Paisaan" },
   description: "Clear, beautifully designed financial decisions for the life you are building.",
+  appleWebApp: { capable: true, title: "Paisaan", statusBarStyle: "default" },
+  icons: { apple: [{ url: "/icons/paisaan-apple-180.png", sizes: "180x180", type: "image/png" }] },
 };
 
 export const viewport: Viewport = {
@@ -31,7 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand" aria-label="Paisaan home"><BrandLogo /></Link>
-        <ThemeControl />
+        <div className="header-actions"><InstallApp /><ThemeControl /></div>
       </header>
       <div className="nav-shell"><PrimaryNav /></div>
       <main id="main-content">{children}</main>

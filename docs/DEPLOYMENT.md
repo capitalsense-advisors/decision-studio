@@ -19,3 +19,7 @@ After Cloudflare's Git build completes, verify `/api/health` reports the deploym
 ## Asset-aware holdings update
 
 Source revision `60b84c15cc1139e5ae2574e840bad593f1851a99`. Cash, debt/FDs, physical gold and statement-valued funds use entered current totals. Stock/ETF quotes are fetched separately. Overall allocation covers all assets; concentration applies only within individual stocks. Unknown invested amounts withhold gain calculations. Currency/method changes clear incompatible amounts.
+
+## Browser app installation
+
+Source revision `ecc5c35c7c7d73025cf13cb1212b89f2f27117c8`. Header Install app action uses the supported browser prompt or platform-specific instructions. Stable manifest ID/scope and PNG/maskable/Apple icons allow browser-managed installation. Android full installation can add it to the app drawer; iPhone uses Home Screen installation. Placement is controlled by the browser/launcher. Network access is still required and portfolio drafts are not made persistent. No service worker caches private data or nonce HTML. Chromium regular-profile installability and mobile-width instructions were checked locally; a native device install remains a manual verification.

@@ -427,3 +427,17 @@ footer{padding-inline:max(1rem,calc((100vw - 1180px)/2))}
 .stock-concentration>p{line-height:1.65;color:inherit;opacity:.8}
 .mirror-result .weight-list b{overflow-wrap:anywhere}
 .holding-fields label{min-width:0}
+
+/* Browser-managed installation, without an automatic popup over the tools. */
+.header-actions{display:flex;align-items:center;gap:.65rem;min-width:0}
+.install-app-button{display:inline-flex;align-items:center;gap:.4rem;min-height:44px;padding:.55rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--raised);color:var(--text);font-size:.875rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.install-app-button:disabled{opacity:.6;cursor:wait}
+.install-app-dialog{width:min(480px,calc(100% - 2rem));max-height:calc(100dvh - 2rem);padding:1.5rem;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text);box-shadow:0 24px 100px rgba(0,0,0,.35);line-height:1.65;overflow:auto}
+.install-app-dialog::backdrop{background:rgba(5,12,25,.7)}
+.install-app-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.install-app-heading>span{font-size:.8rem;font-weight:750;color:var(--accent)}
+.install-app-heading>button{min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:50%;background:var(--raised);color:var(--text);font-size:1.5rem;cursor:pointer}
+.install-app-dialog h2{font-size:2rem;line-height:1.15;margin:1rem 0}
+.install-app-dialog ol{padding-left:1.4rem}.install-app-dialog li{margin:.75rem 0}
+.install-app-dialog .install-app-note{font-size:.875rem;color:var(--muted)}
+@media(max-width:420px){.header-actions{gap:.35rem}.install-app-button{padding:.5rem .6rem;font-size:.8rem}.header-actions .theme-toggle{gap:.2rem}.header-actions .theme-toggle-icon{display:none}.site-header{padding-inline:.65rem}.brand-type small{letter-spacing:.1em;font-size:.6rem}}
