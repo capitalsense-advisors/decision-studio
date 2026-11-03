@@ -794,3 +794,31 @@ Added a user-initiated Install app entry in the header. Supported Android/Chromi
 ## Stride awareness referral — 3 November 2026
 
 Added a clearly branded free companion referral on Home and after the Future Me planning result. It links to the supplied Stride URL in a new tab without passing plan values, profile answers or referrer details. Copy positions Stride around learning and goal reflection, explicitly notes labelled social/investing demos, and makes no claim of live investing, verified SIP streaks or shared accounts. The supplied Stride branch was reviewed separately; findings and execution limitations are documented in docs/STRIDE_AUDIT.md. Legacy application code remains preserved.
+
+## Planning workspace foundation — 3 November 2026
+
+Defined the extension of the existing design language in docs/design/PLANNING_WORKSPACE.md and implemented Overview, Goals, My Money and Review. Reused the brand, fonts, colour tokens, theme controls, install flow and mobile navigation pattern. Added a shared client plan, manually chosen monthly budget, protected liquid reserve, shared goal allocations, nominal-target projections and explicit device-local saving/restoration/deletion. No tax-aware or profile-derived return claim is made; Review lists pending methodology. The old homepage is retained as app/legacy-home.tsx and all legacy routes/calculations remain. Only the main navigation/entry journey is replaced. This is an initial working slice for design review, not a completed roadmap or deployment claim.
+
+## Planning follow-through and India-first copy — 3 November 2026
+
+Extended the local workspace with goal editing, Indian goal starting points, nominal/today’s-money target choice, inflation/fee assumptions, explicitly illustrative gain-tax/cost-basis inputs, actual balance/contribution check-ins, stress comparisons, private JSON export/import confirmation and calendar reminders. Unknown tax or cost basis withholds spendable scenarios. The core projection avoids double-counting recorded contributions in actual balances. New copy is aimed at younger Indian earners without forced slang or guaranteed-return messaging. Optional assumptions are collapsed; template chips, gradient panels and reduced-motion-aware decoration add visual life. Asset-specific Indian tax law, lot accounting, validated risk/return profiles and locked-asset modelling remain explicitly pending. No live deployment is claimed.
+
+## Planning constraints and FIFO worksheet — local development
+
+Added complete per-goal five-question risk reflections with transparent Conservative/Balanced/Aggressive heuristics and foundation/horizon overrides; these do not prescribe allocations or returns. Added separate net future releases with goal assignment, deadline checks and latest-balance double-count prevention. Added a session-only FIFO worksheet with partial lot sales, user-supplied tax policy/reference/date, holding-period boundaries, remaining exemption, cess and loss-related withholding. Saved-plan import/export validates optional reflection/release fields; deleting a goal unassigns its releases. Calendar next-month dates now clamp to the target month's final day.
+
+These changes are local and unreleased. Current Indian tax-rule applicability, special asset/lock-in rules, validated investment suitability, cloud accounts and a connected contextual AI service are not completed by these local tools. Legacy code remains preserved. Validation: 99 unit/component tests, typecheck and lint passed; full production and browser validation recorded after completion.
+
+## Goal-linked SWP — local development
+
+Added an expandable SWP calculator in Review, mapped to existing goal savings/latest check-in, accumulation contributions, future releases and return/fee/inflation assumptions. Users choose the withdrawal start, gross monthly amount, duration and optional annual inflation adjustment. Results report opening corpus, first underfunded withdrawal, total gross withdrawals, ending balance and a balance path alongside a lower-return illustration. Explicitly attached settings survive goal edits and validated plan export/import/save. No after-tax withdrawal, sequence-risk or safe-withdrawal-rate claim is made.
+
+## Indian tax rules — verification blocked
+
+Added a tested, dated historical equity tax-rule module with shared-exemption accounting, applicability gates and refusal to reuse the historical rates for current dates. It is not enabled as a current-law UI preset. Details and completion requirements are in docs/design/INDIAN_TAX_RULES.md. Official source access is currently denied by the runtime network policy; official Income Tax, Budget and Gazette domains were added to the environment settings draft, preserving existing entries. Latest FY 2026–27 law verification and net recurring-SWP tax remain pending. Validation now passes 111 tests, typecheck and lint; the active UI production build and smoke check passed.
+
+Final browser verification passed at 375px and 1280px in light/dark themes: future releases, risk reflection completion/restore, SWP goal selection and essential-spend mapping, attached SWP persistence, FIFO calculation, goal editing, check-ins, JSON import/export, calendar download and no horizontal overflow or uncaught page errors. Mobile Review was visually inspected. The latest-law verification blocker remains unchanged; these checks do not establish current statutory correctness or deployment.
+
+## Deployment preparation — 4 November 2026
+
+Prepared the planning workspace and goal-linked SWP for the existing Git-built Cloudflare Worker branch, preserving its Vinext configuration, dependencies, legacy routes and production compatibility date. Source and Worker each pass lint/typecheck and 111 tests; both production builds pass. Browser journeys passed against the built Worker at mobile/desktop sizes in both themes. Added a reusable exact-release/CSP/assets/manifest smoke script and documented deployment, rollback and the outstanding current-tax verification in docs/releases/2026-11-04-planning-workspace.md. Prepared commits remain local; publication and public-origin verification are separate steps.

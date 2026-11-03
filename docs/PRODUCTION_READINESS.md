@@ -2,6 +2,10 @@
 
 This document separates deployable engineering work from decisions that require a named owner, vendor, or formal review. A green build is necessary, but it is not by itself production approval for a financial product.
 
+## Current Cloudflare delivery
+
+The production Worker is `paisaan-decision-studio` at https://paisaan-decision-studio.shubhamtejani9.workers.dev. Cloudflare builds the root-level web app on `codex/site-deploy` using Vinext/Vite and its pnpm lockfile; development on `main` uses the `apps/web` Next.js workspace and the source gate below. Keep both validation paths distinct. The current prepared planning release, exact-commit smoke command, rollback baseline and tax limitations are documented in [Planning release candidate](releases/2026-11-04-planning-workspace.md).
+
 ## Automated release gate
 
 Run the same gate locally and in GitHub Actions:
@@ -27,7 +31,7 @@ The gate covers ESLint, strict TypeScript, deterministic unit and journey tests,
 
 The following are intentionally not faked in code and remain launch blockers:
 
-- [ ] Choose the production hostname and hosting platform; configure TLS and deployment from `main`.
+- [x] Production hostname and Cloudflare Worker/Git deployment branch are recorded above; source `main` and Worker `codex/site-deploy` have distinct build layouts.
 - [ ] Configure preview deployments for pull requests and a protected production environment.
 - [ ] Add external uptime monitoring against `/api/health` and alert ownership.
 - [ ] Select error monitoring and verify source-map/privacy policy before enabling it.
