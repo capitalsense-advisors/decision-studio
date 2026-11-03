@@ -1,3 +1,4 @@
+import { StrideReferral } from "@/components/stride-referral";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -130,6 +131,8 @@ export default function HomePage() {
         <h2>We want the time you spend here to <span>actually count.</span></h2>
         <div><span>Private by default</span><i /><span>Assumptions shown</span><i /><span>Decisions, not dopamine</span></div>
       </section>
+
+      <StrideReferral />
 
       <section className={styles.closing}>
         <span className={styles.kicker}>Ready when you are</span>

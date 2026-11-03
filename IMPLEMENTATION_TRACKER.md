@@ -789,3 +789,8 @@ Cash balances, debt/FD statement values and physical-gold estimates now use dire
 ## Browser app installation — 3 November 2026
 
 Added a user-initiated Install app entry in the header. Supported Android/Chromium browsers use their native installation prompt; other browsers receive platform-specific instructions, including Safari Add to Home Screen on iPhone/iPad. The install entry hides in standalone app windows and after a confirmed appinstalled event. The manifest now has a stable identity/root scope, standalone launch, PNG icons at 192/512px and a separate maskable icon; Apple touch metadata/icon are supplied. This installs a browser-managed web app rather than a guaranteed app-store package. Android app-drawer placement depends on the browser/launcher and requires full installation rather than a shortcut. Network access is still needed, and installation does not persist portfolio drafts or create an account. No service worker caches financial data or nonce-bearing HTML.
+
+
+## Stride awareness referral — 3 November 2026
+
+Added a clearly branded free companion referral on Home and after the Future Me planning result. It links to the supplied Stride URL in a new tab without passing plan values, profile answers or referrer details. Copy positions Stride around learning and goal reflection, explicitly notes labelled social/investing demos, and makes no claim of live investing, verified SIP streaks or shared accounts. The supplied Stride branch was reviewed separately; findings and execution limitations are documented in docs/STRIDE_AUDIT.md. Legacy application code remains preserved.

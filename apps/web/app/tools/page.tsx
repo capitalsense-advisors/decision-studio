@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId, useMemo, useState } from "react";
 
+import { StrideReferral } from "@/components/stride-referral";
 import { futurePlan } from "@/lib/calculations";
 import { money } from "@/lib/format";
 
@@ -152,6 +153,7 @@ export default function FutureMePage() {
           <small className="result-caption">Lower-return check reduces return by 2 percentage points and keeps inflation unchanged; test higher inflation separately. Educational estimate using your assumptions. Taxes, fees, and market swings are not included.</small>
         </aside>
       </section>
+      <StrideReferral />
     </div>
   );
 }
