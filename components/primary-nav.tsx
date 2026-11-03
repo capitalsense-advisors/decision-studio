@@ -5,13 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const items = [
-  ["/", "Home"],
-  ["/tools", "Plan"],
-  ["/portfolio", "Portfolio"],
-  ["/mutual-funds", "Funds"],
-  ["/ipos", "IPOs"],
-  ["/smallcases", "Baskets"],
-  ["/guide", "Learn"],
+  ["/", "Overview"],
+  ["/goals", "Goals"],
+  ["/my-money", "My Money"],
+  ["/review", "Review"],
 ] as const;
 
 export function PrimaryNav() {
