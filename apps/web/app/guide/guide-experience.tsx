@@ -14,17 +14,17 @@ type Message = {
 };
 
 const starters = [
-  "Can I afford a big goal?",
-  "Is my portfolio too risky?",
-  "How should I compare two funds?",
-  "What is inside an investment basket?",
+  "What changes if I wait one year?",
+  "How much breathing room is enough?",
+  "Which assumption matters most?",
+  "Why does my goal still have a gap?",
 ];
 
 const paths = [
-  { index: "01", label: "Plan a goal", copy: "Turn a future expense into a realistic monthly contribution.", href: "/tools", media: "/media/cards/plan-life.webp" },
-  { index: "02", label: "Read my portfolio", copy: "Find concentration and the risk hiding in your holdings.", href: "/portfolio", media: "/media/cards/portfolio-balance.webp" },
-  { index: "03", label: "Compare funds", copy: "Look beyond recent returns to cost, consistency and fit.", href: "/mutual-funds", media: "/media/cards/fund-compare.webp" },
-  { index: "04", label: "Understand baskets", copy: "See the thesis, allocation and trade-offs before going deeper.", href: "/smallcases", media: "/media/cards/investment-basket.webp" },
+  { index: "01", label: "Name the possibility", copy: "Turn a someday idea into a goal you can see and shape.", href: "/goals", media: "/media/planner/goals-target.webp" },
+  { index: "02", label: "Find breathing room", copy: "Explore the balance between your safety net and monthly goals.", href: "/my-money", media: "/media/planner/money-foundation.webp" },
+  { index: "03", label: "Read the whole plan", copy: "See how every goal shares the same money and the same real life.", href: "/", media: "/media/planner/overview-journey.webp" },
+  { index: "04", label: "Question assumptions", copy: "Stress-test the plan before treating a projection as a promise.", href: "/review", media: "/media/planner/review-paths.webp" },
 ];
 
 const habits = [
@@ -68,7 +68,7 @@ const habits = [
 
 export function GuideExperience() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", text: "Hi, I’m Paisaan. Tell me what money decision is on your mind, and I’ll help you find the clearest place to start." },
+    { role: "assistant", text: "Let’s follow the interesting part. Ask what changes if you wait, save more, protect a bigger buffer, or choose a different goal. I’ll explain the trade-off and point to the part of your plan you can try." },
   ]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
@@ -115,9 +115,9 @@ export function GuideExperience() {
     <div className={`guide-page ${styles.page}`}>
       <section className={styles.hero} aria-labelledby="guide-title">
         <div className={styles.intro}>
-          <span className={styles.kicker}>Your money co-pilot</span>
-          <h1 id="guide-title">Ask the question.<br /><span>Find your next move.</span></h1>
-          <p>No library to decode. Start with what is actually on your mind, and Paisaan will explain the idea or take you to the right workspace.</p>
+          <span className={styles.kicker}>Learn by wondering</span>
+          <h1 id="guide-title">What if?<br /><span>That’s where plans get useful.</span></h1>
+          <p>Skip the financial textbook. Start with a question, discover the trade-off, then try it directly in the plan you are already building.</p>
           <div className={styles.principles}><span>Plain language</span><i /><span>Visible limits</span><i /><span>No buy or sell calls</span></div>
         </div>
 
@@ -141,7 +141,7 @@ export function GuideExperience() {
           </div>}
           <form className={styles.composer} onSubmit={submit}>
             <label htmlFor="guide-question" className="sr-only">Ask Paisaan a money question</label>
-            <input id="guide-question" value={input} onChange={(event) => setInput(event.target.value)} maxLength={600} placeholder="Ask about a goal, portfolio, fund, or basket" disabled={pending} />
+            <input id="guide-question" value={input} onChange={(event) => setInput(event.target.value)} maxLength={600} placeholder="Try: what changes if I save ₹2,000 more?" disabled={pending} />
             <button type="submit" disabled={pending || !input.trim()} aria-label="Send question">↑</button>
           </form>
           <p className={styles.disclaimer}>Educational guidance only. Do not share account numbers, passwords, PAN, or other personal identifiers.</p>
@@ -149,7 +149,7 @@ export function GuideExperience() {
       </section>
 
       <section className={styles.routes} aria-labelledby="routes-title">
-        <header><span className={styles.kicker}>Prefer to choose yourself?</span><h2 id="routes-title">Four questions. Four focused workspaces.</h2></header>
+        <header><span className={styles.kicker}>Turn insight into movement</span><h2 id="routes-title">Every answer has somewhere to go.</h2></header>
         <div className={styles.routeList}>
           {paths.map((path) => <Link href={path.href} key={path.href}><span>{path.index}</span><Image className={styles.routeMedia} src={path.media} alt="" width={96} height={96} sizes="64px" aria-hidden="true" /><div><strong>{path.label}</strong><p>{path.copy}</p></div><b aria-hidden="true">↗</b></Link>)}
         </div>

@@ -9,6 +9,7 @@ const items = [
   ["/goals", "Goals"],
   ["/my-money", "My Money"],
   ["/review", "Review"],
+  ["/learn", "Learn"],
 ] as const;
 
 export function PrimaryNav() {
