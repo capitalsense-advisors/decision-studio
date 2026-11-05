@@ -5,7 +5,7 @@ This file keeps fast feature pushes visible while the project uses batched valid
 ## Working agreement
 
 - Feature commits 1-3 in a batch receive lightweight structural checks only: clean diffs, valid manifests, lockfile generation, dependency peer checks, and asset/path verification.
-- The fourth feature commit triggers the full gate: lint, TypeScript, web tests, source build, Cloudflare build, Python tests, production smoke checks, and a deprecation/audit review.
+- The fourth feature commit triggers the full gate through the manual **Production gates** workflow: lint, TypeScript, web tests, source build, Cloudflare build, Python tests, production smoke checks, and a deprecation/audit review.
 - Run the full gate earlier for authentication, persistence, security, financial-calculation, migration, or deployment-contract changes.
 - A deferred full gate is not a claim that the current commit is production-validated.
 
@@ -17,5 +17,4 @@ This file keeps fast feature pushes visible while the project uses batched valid
 
 ## Gate due
 
-Run the next full gate after three more ordinary feature commits, or before any production release if that happens first.
-
+Run the manual **Production gates** workflow after three more ordinary feature commits, or before any production release if that happens first. Pull requests and the weekly schedule also run the gate.
