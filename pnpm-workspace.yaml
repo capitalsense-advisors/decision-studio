@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
   workerd: true
+minimumReleaseAgeExclude:
+  - jsdom@31.0.0
