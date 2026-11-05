@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import {useState} from "react";
 import {money} from "@/lib/format";
 import {planSummary,projectGoal,type Goal} from "@/lib/planner";
@@ -10,18 +11,29 @@ import {usePlanner} from "./provider";
 import {StrideReferral} from "@/components/stride-referral";
 import styles from "./workspace.module.css";
 const headings={overview:["YOUR NEXT CHAPTER","Big plans. Real-life budgets.","One budget. Your priorities. Room for real life."],goals:["WHAT MATTERS TO YOU","Your someday starts with a plan.","First crore, higher studies or a place of your own. Let’s put a number on it."],money:["YOUR FOUNDATION","Money sorted. Breathing room included.","No salary reveal needed. Start with what’s left after rent, EMIs and real life."],review:["A MOMENT TO REFLECT","Life changes. Your plan can too.","See the constraints and assumptions before making your next move."]};
+const workspaceVisuals={
+ overview:{lead:"Big plans.",accent:"Real-life budgets.",asset:"/media/planner/overview-journey.webp",alt:"A rupee coin moving across three steps toward a goal flag",index:"01",label:"See the whole plan"},
+ goals:{lead:"Your someday",accent:"starts with a plan.",asset:"/media/planner/goals-target.webp",alt:"A goal target surrounded by home, education and travel milestones",index:"02",label:"Name what matters"},
+ money:{lead:"Money sorted.",accent:"Breathing room included.",asset:"/media/planner/money-foundation.webp",alt:"A rupee coin protected inside a soft safety cushion",index:"03",label:"Protect the foundation"},
+ review:{lead:"Life changes.",accent:"Your plan can too.",asset:"/media/planner/review-paths.webp",alt:"Two planning paths being compared with a check marker",index:"04",label:"Check the honest read"},
+};
+
 export function PlanningWorkspace({screen}:{screen:keyof typeof headings}) {
  const {plan,setPlan,message,save,clear,ready}=usePlanner();const summary=planSummary(plan);
  const [editing,setEditing]=useState<string|null>(null);
  const [error,setError]=useState("");const [confirmDelete,setConfirmDelete]=useState(false);
  const [draft,setDraft]=useState({name:"",target:"",years:"5",monthly:"",savings:"",annualReturn:"0",inflation:"0",annualFee:"0",taxRate:"",costBasis:"",targetBasis:"future"});
  function editGoal(g:Goal){setEditing(g.id);setDraft({name:g.name,target:String(g.target),years:String(g.years),monthly:String(g.monthly),savings:String(g.savings),annualReturn:String(g.annualReturn),inflation:String(g.inflation??0),annualFee:String(g.annualFee??0),taxRate:g.taxRate==null?"":String(g.taxRate),costBasis:g.costBasis==null?"":String(g.costBasis),targetBasis:g.targetBasis??"future"});window.scrollTo({top:0,behavior:"auto"});}
- const [eyebrow,title,subtitle]=headings[screen];
+ const [eyebrow,,subtitle]=headings[screen];
+ const visual=workspaceVisuals[screen];
  function addGoal(e:React.FormEvent){e.preventDefault();const goal:Goal={id:editing??crypto.randomUUID(),createdDate:plan.goals.find(g=>g.id===editing)?.createdDate??new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata"}).format(new Date()),checkIns:plan.goals.find(g=>g.id===editing)?.checkIns,risk:plan.goals.find(g=>g.id===editing)?.risk,swp:plan.goals.find(g=>g.id===editing)?.swp,inflation:Number(draft.inflation),annualFee:Number(draft.annualFee),taxRate:draft.taxRate===""?null:Number(draft.taxRate),costBasis:draft.costBasis===""?null:Number(draft.costBasis),targetBasis:draft.targetBasis as "future"|"today",name:draft.name.trim(),target:Number(draft.target),years:Number(draft.years),monthly:Number(draft.monthly||0),savings:Number(draft.savings||0),annualReturn:Number(draft.annualReturn)};
  if(!goal.name||goal.name.length>80||!Number.isFinite(goal.target)||goal.target<=0||goal.target>1e12||![goal.monthly,goal.savings,goal.annualReturn].every(n=>Number.isFinite(n)&&n>=0&&n<=1e12)||goal.annualReturn>15||!Number.isInteger(goal.years)||goal.years<1||goal.years>50||(!editing&&plan.goals.length>=20)||!Number.isFinite(goal.inflation)||goal.inflation!<0||goal.inflation!>20||!Number.isFinite(goal.annualFee)||goal.annualFee!<0||goal.annualFee!>10||(goal.taxRate!==null&&(!Number.isFinite(goal.taxRate)||goal.taxRate!<0||goal.taxRate!>100))||(goal.costBasis!==null&&(!Number.isFinite(goal.costBasis)||goal.costBasis!<0||goal.costBasis!>1e12))){setError("Enter a name, positive target, 1–50 years, non-negative allocations and a return assumption from 0–15%.");return;}
  setPlan({...plan,goals:editing?plan.goals.map(g=>g.id===editing?goal:g):[...plan.goals,goal]});setDraft({...draft,name:"",target:"",monthly:"",savings:""});setError("");setEditing(null);}
- return <div className={styles.workspace}>
-  <header className={styles.hero}><div><span className={styles.eyebrow}>{eyebrow}</span><h1>{title}</h1><p>{subtitle}</p></div><div className={`${styles.seal} ${styles.lively}`} aria-hidden="true"><svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="76"/><path d="M42 124L73 92L100 108L139 51"/><circle cx="139" cy="51" r="5"/></svg><span>YOUR PACE.<br/>YOUR PRIORITIES.</span></div></header>
+ return <div className={`${styles.workspace} ${styles[screen]}`}>
+  <header className={styles.hero}>
+   <div className={styles.heroCopy}><span className={styles.eyebrow}>{eyebrow}</span><h1>{visual.lead}<br/><em>{visual.accent}</em></h1><p>{subtitle}</p><div className={styles.heroMeta}><span><i/>Private by default</span><span>Manual assumptions</span><span>No signup</span></div></div>
+   <div className={styles.heroVisual} aria-hidden="true"><div className={styles.visualHalo}/><Image className={styles.heroAsset} src={visual.asset} alt={visual.alt} width={720} height={720} priority={screen==="overview"}/><div className={styles.visualLabel}><span>{visual.index} / 04</span><strong>{visual.label}</strong></div></div>
+  </header>
   <div className={styles.storage}><span role="status">{ready?message:"Opening your workspace…"}</span><button className="button secondary" disabled={!ready} onClick={save}>Save on this device</button></div>
   {!ready?<p>Loading your plan…</p>:<>
   {(summary.budgetGap>0||summary.savingsGap>0)&&<div className={styles.warning} role="alert">Your goals share the same money. {summary.budgetGap>0&&`${money(summary.budgetGap)} more per month is allocated than your budget allows. `}{summary.savingsGap>0&&`${money(summary.savingsGap)} more savings are assigned than are available after the reserve.`} Review allocations before treating the projections as feasible.</div>}

@@ -1,23 +1,25 @@
 {
   "name": "capitalsense-decision-studio",
   "private": true,
+  "packageManager": "pnpm@12.16.1",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=26.13.0 <27",
+    "pnpm": "12.16.1"
   },
   "workspaces": ["apps/web"],
   "devDependencies": {
     "next": "16.4.2"
   },
   "scripts": {
-    "dev": "npm run dev --workspace @capitalsense/decision-studio-web",
-    "build": "npm run build --workspace @capitalsense/decision-studio-web",
-    "start": "npm run start --workspace @capitalsense/decision-studio-web",
-    "lint": "npm run lint --workspace @capitalsense/decision-studio-web",
-    "test": "npm run test:web",
-    "test:web": "npm run test --workspace @capitalsense/decision-studio-web",
+    "dev": "pnpm --filter @capitalsense/decision-studio-web dev",
+    "build": "pnpm --filter @capitalsense/decision-studio-web build",
+    "start": "pnpm --filter @capitalsense/decision-studio-web start",
+    "lint": "pnpm --filter @capitalsense/decision-studio-web lint",
+    "test": "pnpm test:web",
+    "test:web": "pnpm --filter @capitalsense/decision-studio-web test",
     "refresh:ipos": "node scripts/refresh-ipo-snapshot.mjs",
-    "typecheck": "npm run typecheck --workspace @capitalsense/decision-studio-web",
-    "release:check": "npm run lint && npm run typecheck && npm run test:web && npm run build && npm run smoke:production",
+    "typecheck": "pnpm --filter @capitalsense/decision-studio-web typecheck",
+    "release:check": "pnpm lint && pnpm typecheck && pnpm test:web && pnpm build && pnpm smoke:production",
     "smoke:production": "node scripts/smoke-production.mjs"
   }
 }
