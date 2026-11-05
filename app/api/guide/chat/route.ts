@@ -9,19 +9,19 @@ type RouteChoice = { href: string; actionLabel: string; fallback: string };
 export const runtime = "nodejs";
 
 const choices = {
-  plan: { href: "/tools", actionLabel: "Open Plan", fallback: "Start by naming the goal, when you want it, what it may cost, and what you can contribute today. Plan will show whether those assumptions work together and which lever matters most." },
-  portfolio: { href: "/portfolio", actionLabel: "Open Portfolio", fallback: "A useful risk check starts with position weights, not the number of holdings. Portfolio will help you spot concentration and any holding that dominates the outcome." },
-  funds: { href: "/mutual-funds", actionLabel: "Open Fund Match", fallback: "Compare funds on fit, cost, consistency and downside behavior. Recent return is useful context, but it should not decide the match by itself." },
-  baskets: { href: "/smallcases", actionLabel: "Explore Baskets", fallback: "Start with the basket’s thesis, then check where its conviction is concentrated and what could break the idea. Baskets explains those trade-offs before you continue." },
-  learn: { href: "/guide", actionLabel: "Ask another question", fallback: "I can help with four kinds of decisions: planning a goal, reviewing a portfolio, comparing mutual funds, or understanding an investment basket. Tell me which one feels closest to your question." },
+  goal: { href: "/goals", actionLabel: "Try it on a goal", fallback: "A goal is a relationship between amount, time, what you already have, and what you can add each month. Change one lever at a time in Goals and watch the projection move; that makes the trade-off easier to understand." },
+  foundation: { href: "/my-money", actionLabel: "Explore My Money", fallback: "Breathing room is the money left after real life and the safety net you choose. In My Money, move the monthly-room and reserve controls separately. The live picture will show what stays protected and what is actually available for goals." },
+  review: { href: "/review", actionLabel: "Question the plan", fallback: "A projection becomes useful when you can see what might change it. Review separates your chosen assumptions from known amounts, then lets you explore timing, risk, fees, inflation, and access without pretending the future is certain." },
+  overview: { href: "/", actionLabel: "See the whole plan", fallback: "Your goals share one monthly budget and one pool of savings. Overview puts those constraints beside each other so a promising goal does not quietly borrow money already promised somewhere else." },
+  learn: { href: "/learn", actionLabel: "Explore another question", fallback: "Try asking a what-if question: what changes if you wait a year, protect a larger emergency buffer, save a little more each month, or lower an assumed return? I’ll connect the idea to the part of your plan where you can see it move." },
 } satisfies Record<string, RouteChoice>;
 
 function chooseRoute(message: string): RouteChoice {
   const text = message.toLowerCase();
-  if (/\b(goal|afford|house|home|car|retire|retirement|future|save|savings|saving|sip|monthly|crore|move out|wedding|education)\b/.test(text)) return choices.plan;
-  if (/\b(portfolio|holdings?|stocks?|diversify|diversification|concentration|overlap|allocation|risk|risky)\b/.test(text)) return choices.portfolio;
-  if (/\b(mutual funds?|funds?|nav|expense ratio|scheme|returns?)\b/.test(text)) return choices.funds;
-  if (/\b(baskets?|smallcase|theme|strategy|curated)\b/.test(text)) return choices.baskets;
+  if (/\b(goal|afford|house|home|car|retire|retirement|future|crore|move out|wedding|education|trip|deadline)\b/.test(text)) return choices.goal;
+  if (/\b(budget|save|savings|saving|monthly|salary|income|expense|emi|emergency|reserve|buffer|breathing room|liquid)\b/.test(text)) return choices.foundation;
+  if (/\b(assumption|return|inflation|fee|tax|risk|risky|delay|wait|scenario|what if|check|review)\b/.test(text)) return choices.review;
+  if (/\b(start|overview|whole plan|priorit|together|where am i)\b/.test(text)) return choices.overview;
   return choices.learn;
 }
 
